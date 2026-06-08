@@ -1,0 +1,26 @@
+name: msg
+
+on:
+  workflow_run:
+    workflows: ["Rodar Testes"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: msg
+        uses: fga-eps-mds/2026.1-MeasureSoftGram-Action@main
+        with:
+          githubToken: ${{ secrets.GITHUBTOKEN }}
+          msgramServiceToken: ${{ secrets.MSGRAMPLUGINTOKEN }}
+          productName: "Measure"
+          workflowName: 'Rodar Testes'
+          collectSonarqubeMetrics: true
+          collectGithubMetrics: true
+          usLabel: "US"
