@@ -29,7 +29,7 @@ const App: React.FC = () => {
   }, [vscode]);
 
   const [scoreData, setScoreData]       = useState<ScoreData | null>(null);
-  const [scoreLoading, setScoreLoading] = useState(false);
+  const [scoreLoading, setScoreLoading] = useState(true);
   const [notifText, setNotifText]       = useState('Análise concluída. 2 de 3 características dentro da meta da release.');
   const [notifType, setNotifType]       = useState<'ok' | 'error'>('ok');
 
@@ -49,9 +49,14 @@ const App: React.FC = () => {
   const [publishStatus, setPublishStatus] = useState('');
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
+  const [settings, setSettings] = useState<SettingsData>({ serviceUrl: '', token: '', productName: '' });
 
   const [yaml, setYaml]                   = useState('');
   const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
+
+  useEffect(() => {
+    vscode.postMessage({ command: 'request_score' });
+  }, [vscode]);
 
   useEffect(() => {
     const handler = (event: MessageEvent<ExtensionMessage>) => {
@@ -136,6 +141,7 @@ const App: React.FC = () => {
   };
 
   const handleSaveSettings = (data: SettingsData) => {
+    setSettings(data);
     vscode.postMessage({ command: 'save_settings', data });
   };
 
@@ -163,6 +169,8 @@ const App: React.FC = () => {
         {activeTab === 'dashboard' && (
           <DashboardView
             scoreData={scoreData}
+            scoreLoading={scoreLoading}
+            productName={settings.productName}
             showCommitWarn={showCommitWarn}
             notifText={notifText}
             notifType={notifType}

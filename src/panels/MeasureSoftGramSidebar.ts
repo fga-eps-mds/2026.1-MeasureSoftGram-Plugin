@@ -1,38 +1,56 @@
-import {Uri, Webview, WebviewView, WebviewViewProvider} from "vscode";
-import {getNonce, getUri} from "../utilities/utilities";
+import { OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window } from 'vscode';
+import { getNonce, getUri } from '../utilities/utilities';
+import { fetchScoreData, MsgramSettings } from '../services/msgramApi';
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
-    public static readonly viewType = "msgram.sidebarView";
-    private _view?: WebviewView;
+  public static readonly viewType = 'msgram.sidebarView';
+  private _view?: WebviewView;
+  private _settings: MsgramSettings = { serviceUrl: '', token: '', productName: '' };
+  private _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
 
-    constructor(private readonly _extensionUri: Uri) {
+  constructor(private readonly _extensionUri: Uri) {}
+
+  public resolveWebviewView(webviewView: WebviewView) {
+    this._view = webviewView;
+
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [
+        Uri.joinPath(this._extensionUri, 'out'),
+        Uri.joinPath(this._extensionUri, 'webview-ui/build'),
+      ],
+    };
+
+    webviewView.webview.html = this._getWebviewContent(
+      webviewView.webview,
+      this._extensionUri,
+    );
+
+    this._setWebviewMessageListener(webviewView.webview);
+  }
+
+  private async _loadScore() {
+    if (!this._view) { return; }
+    const webview = this._view.webview;
+
+    webview.postMessage({ command: 'score_loading' });
+    this._log.show(true);
+    try {
+      const data = await fetchScoreData(this._settings, (msg) => this._log.appendLine(msg));
+      webview.postMessage({ command: 'score_loaded', data });
+    } catch (err: any) {
+      const msg = err.message ?? 'Erro ao buscar dados.';
+      this._log.appendLine(`[ERRO] ${msg}`);
+      webview.postMessage({ command: 'score_error', message: msg });
     }
+  }
 
-    public resolveWebviewView(webviewView: WebviewView) {
-        this._view = webviewView;
+  private _getWebviewContent(webview: Webview, extensionUri: Uri) {
+    const stylesUri = getUri(webview, extensionUri, ['webview-ui', 'build', 'assets', 'index.css']);
+    const scriptUri = getUri(webview, extensionUri, ['webview-ui', 'build', 'assets', 'index.js']);
+    const nonce = getNonce();
 
-        webviewView.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [
-                Uri.joinPath(this._extensionUri, "out"),
-                Uri.joinPath(this._extensionUri, "webview-ui/build"),
-            ],
-        };
-
-        webviewView.webview.html = this._getWebviewContent(
-            webviewView.webview,
-            this._extensionUri
-        );
-
-        this._setWebviewMessageListener(webviewView.webview);
-    }
-
-    private _getWebviewContent(webview: Webview, extensionUri: Uri) {
-        const stylesUri = getUri(webview, extensionUri, ["webview-ui", "build", "assets", "index.css"]);
-        const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "assets", "index.js"]);
-        const nonce = getNonce();
-
-        return /*html*/ `
+    return /*html*/ `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -48,14 +66,20 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
       </body>
       </html>
     `;
-    }
+  }
 
-    private _setWebviewMessageListener(webview: Webview) {
-        webview.onDidReceiveMessage((message: any) => {
-            switch (message.command) {
-                case "hello":
-                    return;
-            }
-        });
-    }
+  private _setWebviewMessageListener(webview: Webview) {
+    webview.onDidReceiveMessage(async (message: any) => {
+      switch (message.command) {
+        case 'request_score':
+          await this._loadScore();
+          break;
+        case 'save_settings':
+          this._settings = message.data as MsgramSettings;
+          webview.postMessage({ command: 'settings_saved' });
+          await this._loadScore();
+          break;
+      }
+    });
+  }
 }

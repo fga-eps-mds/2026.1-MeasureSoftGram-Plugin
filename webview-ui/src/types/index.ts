@@ -13,6 +13,7 @@ export type PanelMessage =
   | { command: 'stop_analysis' }
   | { command: 'publish' }
   | { command: 'request_yaml' }
+  | { command: 'request_score' }
   | { command: 'save_action'; yaml: string }
   | { command: 'save_settings'; data: SettingsData };
 

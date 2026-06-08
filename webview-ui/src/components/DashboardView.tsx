@@ -4,6 +4,8 @@ import { getCharStatus } from '../utils/helpers';
 
 interface DashboardViewProps {
   scoreData: ScoreData | null;
+  scoreLoading: boolean;
+  productName: string;
   showCommitWarn: boolean;
   notifText: string;
   notifType: 'ok' | 'error';
@@ -14,6 +16,8 @@ interface DashboardViewProps {
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   scoreData,
+  scoreLoading,
+  productName,
   showCommitWarn,
   notifText,
   notifType,
@@ -21,8 +25,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   isPublishing,
   onPublish,
 }) => {
-  const score = scoreData?.score ?? 0.77;
+  const score    = scoreData?.score ?? 0;
   const scorePct = (score * 100).toFixed(0);
+  const avgGoal  = scoreData
+    ? scoreData.characteristics.reduce((s, c) => s + c.goal, 0) / scoreData.characteristics.length
+    : 0.7;
+
+  const worstChar = scoreData?.characteristics.reduce((worst, c) =>
+    c.value - c.goal < worst.value - worst.goal ? c : worst,
+  );
+
+  const productLabel = productName || 'sem produto configurado';
 
   return (
     <div className="vw on" id="view-dashboard">
@@ -33,13 +46,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <i className="ti ti-chart-radar" style={{ color: '#0e639c', fontSize: 16 }} />
             MeasureSoftGram
           </div>
-          <div className="view-sub">meu-produto · última análise: agora mesmo</div>
+          <div className="view-sub">
+            {productLabel} · última análise: agora mesmo
+          </div>
         </div>
         <span className="rbadge">R2025.1</span>
       </div>
 
+      {/* Loading state */}
+      {scoreLoading && (
+        <div className="notif" style={{ marginBottom: 14 }}>
+          <i className="ti ti-loader run-anim" />
+          <span>Carregando dados do produto...</span>
+        </div>
+      )}
+
       {/* Commit warning */}
-      {showCommitWarn && (
+      {!scoreLoading && showCommitWarn && worstChar && (
         <div className="commit-warn show" id="commit-warn">
           <div className="cw-title">
             <i className="ti ti-git-commit" /> Atenção antes do commit
@@ -47,8 +70,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="cw-desc">
             Você ainda não rodou a análise MSGRAM nesta sessão. Commitar sem analisar pode
             introduzir regressão em{' '}
-            <strong style={{ color: '#cca700' }}>Functional Suitability</strong> — última nota
-            0.61, próxima da meta 0.60.
+            <strong style={{ color: '#cca700' }}>{worstChar.name}</strong> — última nota{' '}
+            {worstChar.value.toFixed(2)}, próxima da meta {worstChar.goal.toFixed(2)}.
           </div>
         </div>
       )}
@@ -65,24 +88,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       )}
 
       {/* Score hero */}
-      <div className="score-hero">
-        <div className="hero-num" id="hero-score">
-          {score.toFixed(2)}
-        </div>
-        <div className="hero-right">
-          <div className="hero-lbl">Nota geral do produto — R2025.1</div>
-          <div className="hero-bar">
-            <div
-              className="hero-fill"
-              id="hero-fill"
-              style={{ width: `${scorePct}%` }}
-            />
+      {!scoreLoading && (
+        <div className="score-hero">
+          <div className="hero-num" id="hero-score">
+            {scoreData ? score.toFixed(2) : '—'}
           </div>
-          <div className="hero-meta">
-            meta da release: 0.70 · <span className="ok">acima ✓</span>
+          <div className="hero-right">
+            <div className="hero-lbl">Nota geral do produto — R2025.1</div>
+            <div className="hero-bar">
+              <div
+                className="hero-fill"
+                id="hero-fill"
+                style={{ width: `${scorePct}%` }}
+              />
+            </div>
+            <div className="hero-meta">
+              meta da release: {avgGoal.toFixed(2)} ·{' '}
+              {scoreData
+                ? score >= avgGoal
+                  ? <span className="ok">acima ✓</span>
+                  : <span className="fail">abaixo ✗</span>
+                : '—'}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div id="chars-dashboard">
         {scoreData?.characteristics.map((c) => {
