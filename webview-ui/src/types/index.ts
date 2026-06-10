@@ -14,6 +14,7 @@ export type PanelMessage =
   | { command: 'publish' }
   | { command: 'request_yaml' }
   | { command: 'request_score' }
+  | { command: 'select_repo'; repoPk: number }
   | { command: 'save_action'; yaml: string }
   | { command: 'save_settings'; data: SettingsData };
 
@@ -21,6 +22,7 @@ export type ExtensionMessage =
   | { command: 'score_loading' }
   | { command: 'score_loaded'; data: ScoreData }
   | { command: 'score_error'; message: string }
+  | { command: 'repos_loaded'; repos: RepoItem[] }
   | { command: 'analysis_started' }
   | { command: 'output_line'; line: string; isError: boolean }
   | { command: 'analysis_done'; success: boolean; exitCode: number }
@@ -29,6 +31,11 @@ export type ExtensionMessage =
   | { command: 'action_saved' }
   | { command: 'published'; release: string }
   | { command: 'settings_saved' };
+
+export interface RepoItem {
+  id: number;
+  name: string;
+}
 
 export interface Characteristic {
   name: string;

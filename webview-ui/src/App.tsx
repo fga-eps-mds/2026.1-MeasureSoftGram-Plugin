@@ -14,6 +14,7 @@ import type {
   LogLine,
   SettingsData,
   ExtensionMessage,
+  RepoItem,
 } from './types/index';
 
 const App: React.FC = () => {
@@ -30,6 +31,8 @@ const App: React.FC = () => {
 
   const [scoreData, setScoreData]       = useState<ScoreData | null>(null);
   const [scoreLoading, setScoreLoading] = useState(true);
+  const [repos, setRepos]               = useState<RepoItem[]>([]);
+  const [selectedRepoPk, setSelectedRepoPk] = useState<number | null>(null);
   const [notifText, setNotifText]       = useState('Análise concluída. 2 de 3 características dentro da meta da release.');
   const [notifType, setNotifType]       = useState<'ok' | 'error'>('ok');
 
@@ -62,6 +65,11 @@ const App: React.FC = () => {
     const handler = (event: MessageEvent<ExtensionMessage>) => {
       const msg = event.data;
       switch (msg.command) {
+
+        case 'repos_loaded':
+          setRepos(msg.repos);
+          if (msg.repos.length) { setSelectedRepoPk(msg.repos[0].id); }
+          break;
 
         case 'score_loading':
           setScoreLoading(true);
@@ -132,6 +140,11 @@ const App: React.FC = () => {
     return () => window.removeEventListener('message', handler);
   }, [showTab, appendLog]);
 
+  const handleSelectRepo = (repoPk: number) => {
+    setSelectedRepoPk(repoPk);
+    vscode.postMessage({ command: 'select_repo', repoPk });
+  };
+
   const handleRunAnalysis  = () => vscode.postMessage({ command: 'run_analysis' });
   const handleStopAnalysis = () => vscode.postMessage({ command: 'stop_analysis' });
 
@@ -154,6 +167,9 @@ const App: React.FC = () => {
       <Sidebar
         scoreData={scoreData}
         scoreLoading={scoreLoading}
+        repos={repos}
+        selectedRepoPk={selectedRepoPk}
+        onSelectRepo={handleSelectRepo}
         onRunAnalysis={handleRunAnalysis}
         onStopAnalysis={handleStopAnalysis}
         onShowSettings={() => showTab('settings')}

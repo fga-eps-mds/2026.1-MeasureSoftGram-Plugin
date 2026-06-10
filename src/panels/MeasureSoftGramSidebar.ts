@@ -1,12 +1,14 @@
 import { OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window } from 'vscode';
 import { getNonce, getUri } from '../utilities/utilities';
-import { fetchScoreData, MsgramSettings } from '../services/msgramApi';
+import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
   public static readonly viewType = 'msgram.sidebarView';
   private _view?: WebviewView;
   private _settings: MsgramSettings = { serviceUrl: '', token: '', productName: '' };
   private _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
+  private _context: RepoContext | null = null;
+  private _selectedRepo: RepoItem | null = null;
 
   constructor(private readonly _extensionUri: Uri) {}
 
@@ -29,17 +31,54 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     this._setWebviewMessageListener(webviewView.webview);
   }
 
-  private async _loadScore() {
+  private logger() {
+    return (msg: string) => this._log.appendLine(msg);
+  }
+
+  private async _loadReposAndScore() {
     if (!this._view) { return; }
     const webview = this._view.webview;
 
-    webview.postMessage({ command: 'score_loading' });
     this._log.show(true);
+    webview.postMessage({ command: 'score_loading' });
+
     try {
-      const data = await fetchScoreData(this._settings, (msg) => this._log.appendLine(msg));
+      this._context = await fetchRepositories(this._settings, this.logger());
+      const repos = this._context.repos;
+
+      webview.postMessage({ command: 'repos_loaded', repos });
+
+      if (!repos.length) {
+        webview.postMessage({ command: 'score_error', message: 'Nenhum repositório encontrado.' });
+        return;
+      }
+
+      this._selectedRepo = repos[0];
+      await this._loadScoreForSelected();
+    } catch (err: any) {
+      const msg = err.message ?? 'Erro ao buscar repositórios.';
+      this._log.appendLine(`[ERRO] ${msg}`);
+      webview.postMessage({ command: 'score_error', message: msg });
+    }
+  }
+
+  private async _loadScoreForSelected() {
+    if (!this._view || !this._context || !this._selectedRepo) { return; }
+    const webview = this._view.webview;
+
+    webview.postMessage({ command: 'score_loading' });
+    try {
+      const data = await fetchScoreForRepo(
+        this._settings,
+        this._context.orgPk,
+        this._context.productPk,
+        this._selectedRepo.id,
+        this._selectedRepo.name,
+        this.logger(),
+      );
       webview.postMessage({ command: 'score_loaded', data });
     } catch (err: any) {
-      const msg = err.message ?? 'Erro ao buscar dados.';
+      const msg = err.message ?? 'Erro ao buscar métricas.';
       this._log.appendLine(`[ERRO] ${msg}`);
       webview.postMessage({ command: 'score_error', message: msg });
     }
@@ -72,12 +111,25 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     webview.onDidReceiveMessage(async (message: any) => {
       switch (message.command) {
         case 'request_score':
-          await this._loadScore();
+          await this._loadReposAndScore();
           break;
+
+        case 'select_repo': {
+          if (!this._context) { break; }
+          const repo = this._context.repos.find(r => r.id === message.repoPk);
+          if (repo) {
+            this._selectedRepo = repo;
+            await this._loadScoreForSelected();
+          }
+          break;
+        }
+
         case 'save_settings':
           this._settings = message.data as MsgramSettings;
+          this._context = null;
+          this._selectedRepo = null;
           webview.postMessage({ command: 'settings_saved' });
-          await this._loadScore();
+          await this._loadReposAndScore();
           break;
       }
     });

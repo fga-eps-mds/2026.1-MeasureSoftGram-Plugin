@@ -1,10 +1,13 @@
 import React from 'react';
-import type { ScoreData, TabName } from '../types';
+import type { RepoItem, ScoreData, TabName } from '../types';
 import { getCharStatus, getStatusColor } from '../utils/helpers';
 
 interface SidebarProps {
   scoreData: ScoreData | null;
   scoreLoading: boolean;
+  repos: RepoItem[];
+  selectedRepoPk: number | null;
+  onSelectRepo: (repoPk: number) => void;
   onRunAnalysis: () => void;
   onStopAnalysis: () => void;
   onShowSettings: () => void;
@@ -16,6 +19,9 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   scoreData,
   scoreLoading,
+  repos,
+  selectedRepoPk,
+  onSelectRepo,
   onRunAnalysis,
   onStopAnalysis,
   onShowSettings,
@@ -28,23 +34,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="sbtns">
         <button className="btn" id="btn-run" onClick={onRunAnalysis} disabled={isRunning}>
           {isRunning ? (
-            <>
-              <i className="ti ti-loader run-anim" /> Analisando...
-            </>
+            <><i className="ti ti-loader run-anim" /> Analisando...</>
           ) : (
-            <>
-              <i className="ti ti-player-play" /> Analisar
-            </>
+            <><i className="ti ti-player-play" /> Analisar</>
           )}
         </button>
 
         {isRunning && (
-          <button
-            className="btn"
-            id="btn-stop"
-            onClick={onStopAnalysis}
-            style={{ background: '#c72e2e' }}
-          >
+          <button className="btn" id="btn-stop" onClick={onStopAnalysis} style={{ background: '#c72e2e' }}>
             <i className="ti ti-player-stop" /> Parar
           </button>
         )}
@@ -53,6 +50,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <i className="ti ti-settings" /> Config
         </button>
       </div>
+
+      {/* Seletor de repositório */}
+      {repos.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <div className="slbl">
+            <i className="ti ti-git-branch" /> Repositório
+          </div>
+          <select
+            style={{
+              width: '100%',
+              background: 'var(--vscode-input-background)',
+              color: 'var(--vscode-input-foreground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: 3,
+              padding: '4px 6px',
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+            value={selectedRepoPk ?? ''}
+            onChange={(e) => onSelectRepo(Number(e.target.value))}
+          >
+            {repos.map((r) => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div style={{ marginTop: 10 }}>
         <div className="slbl">
@@ -96,13 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                   <div className="bar">
                     <div className="barbg">
-                      <div
-                        className="barfill"
-                        style={{
-                          width: `${(c.value * 100).toFixed(0)}%`,
-                          background: color,
-                        }}
-                      />
+                      <div className="barfill" style={{ width: `${(c.value * 100).toFixed(0)}%`, background: color }} />
                     </div>
                   </div>
                 </React.Fragment>
@@ -117,12 +135,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <i className="ti ti-info-circle" /> Status
         </div>
         <div className="srow">
-          <div className="sdot" style={{ background: '#4ec9b0' }} />
-          <span className="stxt">Conectado · meu-produto · R2025.1</span>
-        </div>
-        <div className="srow">
-          <div className="sdot" style={{ background: '#4ec9b0' }} />
-          <span className="stxt">SonarQube · projeto-key OK</span>
+          <div className="sdot" style={{ background: scoreData ? '#4ec9b0' : '#666' }} />
+          <span className="stxt">
+            {scoreData ? 'Conectado' : 'Sem dados'} · R2025.1
+          </span>
         </div>
       </div>
     </div>
