@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar }       from './components/Sidebar';
 import { Tabs }          from './components/Tabs';
 import { DashboardView } from './components/DashboardView';
-import { OutputView }    from './components/OutputView';
+import { OutputView }    from './components/action/OutputView.tsx';
 import { SettingsView }  from './components/SettingsView';
-import { ActionView }    from './components/ActionView';
+import { ActionView }    from './components/action/ActionView.tsx';
 import { getVSCodeAPI }  from './utils/vscode';
 import { now }           from './utils/helpers';
 
@@ -50,7 +50,7 @@ const App: React.FC = () => {
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
 
-  const [yaml, setYaml]                   = useState('');
+  const [yaml, setYaml]                         = useState('');
   const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
 
   useEffect(() => {
@@ -87,10 +87,10 @@ const App: React.FC = () => {
           setIsRunning(false);
           setShowCommitWarn(false);
           appendLog(
-            msg.success
-              ? 'act concluído com sucesso.'
-              : `act encerrou com código ${msg.exitCode}.`,
-            !msg.success,
+              msg.success
+                  ? 'act concluído com sucesso.'
+                  : `act encerrou com código ${msg.exitCode}.`,
+              !msg.success,
           );
           if (msg.success) {
             setTimeout(() => showTab('dashboard'), 600);
@@ -143,57 +143,63 @@ const App: React.FC = () => {
     vscode.postMessage({ command: 'save_action', yaml });
   };
 
+  const handleRunAction = () => {
+    vscode.postMessage({ command: 'run_action' });
+  };
+
   return (
-    <>
-      <Sidebar
-        scoreData={scoreData}
-        scoreLoading={scoreLoading}
-        onRunAnalysis={handleRunAnalysis}
-        onStopAnalysis={handleStopAnalysis}
-        onShowSettings={() => showTab('settings')}
-        isRunning={isRunning}
-        activeTab={activeTab}
-        onShowTab={showTab}
-      />
-
-      <Tabs active={activeTab} onSelect={showTab} />
-
-      <div className="pc">
-
-        {activeTab === 'dashboard' && (
-          <DashboardView
+      <>
+        <Sidebar
             scoreData={scoreData}
-            showCommitWarn={showCommitWarn}
-            notifText={notifText}
-            notifType={notifType}
-            publishStatus={publishStatus}
-            isPublishing={isPublishing}
-            onPublish={handlePublish}
-          />
-        )}
+            scoreLoading={scoreLoading}
+            onRunAnalysis={handleRunAnalysis}
+            onStopAnalysis={handleStopAnalysis}
+            onShowSettings={() => showTab('settings')}
+            isRunning={isRunning}
+            activeTab={activeTab}
+            onShowTab={showTab}
+        />
 
-        {activeTab === 'output' && (
-          <OutputView lines={logLines} />
-        )}
+        <Tabs active={activeTab} onSelect={showTab} />
 
-        {activeTab === 'settings' && (
-          <SettingsView
-            onSave={handleSaveSettings}
-            savedFeedback={settingsSavedFeedback}
-          />
-        )}
+        <div className="pc">
 
-        {activeTab === 'action' && (
-          <ActionView
-            yaml={yaml}
-            onChange={setYaml}
-            onSave={handleSaveAction}
-            savedFeedback={actionSavedFeedback}
-          />
-        )}
+          {activeTab === 'dashboard' && (
+              <DashboardView
+                  scoreData={scoreData}
+                  showCommitWarn={showCommitWarn}
+                  notifText={notifText}
+                  notifType={notifType}
+                  publishStatus={publishStatus}
+                  isPublishing={isPublishing}
+                  onPublish={handlePublish}
+              />
+          )}
 
-      </div>
-    </>
+          {activeTab === 'output' && (
+              <OutputView lines={logLines} />
+          )}
+
+          {activeTab === 'settings' && (
+              <SettingsView
+                  onSave={handleSaveSettings}
+                  savedFeedback={settingsSavedFeedback}
+              />
+          )}
+
+          {activeTab === 'action' && (
+              <ActionView
+                  yaml={yaml}
+                  onChange={setYaml}
+                  onSave={handleSaveAction}
+                  savedFeedback={actionSavedFeedback}
+                  onRun={handleRunAction}
+                  running={isRunning}
+              />
+          )}
+
+        </div>
+      </>
   );
 };
 
