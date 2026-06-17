@@ -46,6 +46,7 @@ export interface Characteristic {
 export interface ScoreData {
   score: number;
   characteristics: Characteristic[];
+  noData?: boolean;
 }
 
 export interface SettingsData {

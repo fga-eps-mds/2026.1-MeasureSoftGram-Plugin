@@ -96,6 +96,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="score-lbl">score geral · R2025.1</div>
         </div>
 
+        {!scoreLoading && scoreData?.noData && (
+          <div className="notif warn-n" style={{ margin: '6px 0', fontSize: 11 }}>
+            <i className="ti ti-alert-circle" style={{ color: '#cca700' }} />
+            <span>Métricas ainda não calculadas para este repositório.</span>
+          </div>
+        )}
+
         <div className="slbl">
           <i className="ti ti-chart-bar" /> Características
         </div>
@@ -105,6 +112,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="srow" style={{ padding: '6px 0' }}>
               <i className="ti ti-loader run-anim" style={{ color: '#666', fontSize: 13 }} />
               <span className="stxt">carregando...</span>
+            </div>
+          ) : scoreData.noData ? (
+            <div className="srow" style={{ padding: '6px 0', color: '#888', fontSize: 11 }}>
+              <i className="ti ti-mood-empty" style={{ marginRight: 4 }} />
+              <span className="stxt">nenhum dado disponível</span>
             </div>
           ) : (
             scoreData.characteristics.map((c) => {

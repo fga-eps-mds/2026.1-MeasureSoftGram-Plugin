@@ -61,6 +61,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       )}
 
+      {/* No data warning */}
+      {!scoreLoading && scoreData?.noData && (
+        <div className="notif warn-n" id="notif-no-data">
+          <i className="ti ti-alert-circle" style={{ color: '#cca700' }} />
+          <span>
+            Este repositório ainda não possui métricas calculadas no MeasureSoftGram.
+            Execute uma análise completa para gerar os dados.
+          </span>
+        </div>
+      )}
+
       {/* Commit warning */}
       {!scoreLoading && showCommitWarn && worstChar && (
         <div className="commit-warn show" id="commit-warn">

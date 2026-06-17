@@ -29,6 +29,7 @@ export interface Characteristic {
 export interface ScoreData {
   score: number;
   characteristics: Characteristic[];
+  noData?: boolean;
 }
 
 // ── Mock ─────────────────────────────────────────────────────────────────────
@@ -191,6 +192,11 @@ export async function fetchScoreForRepo(
     get<TsqmiResp>(tsqmiUrl, settings.token),
     get<{ results: CharItem[] }>(charsUrl, settings.token),
   ]);
+
+  if (tsqmi.value == null) {
+    log(`[${ts()}] Repositório "${repoName}" ainda não possui TSQMI calculado.`);
+    return { score: 0, characteristics: [], noData: true };
+  }
 
   log(`[${ts()}] → TSQMI: ${tsqmi.value.toFixed(4)}`);
   chars.results.forEach(c => log(`[${ts()}] → ${c.name}: ${c.latest.value.toFixed(4)}`));
