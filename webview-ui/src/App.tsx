@@ -7,6 +7,8 @@ import { ActionView }    from './components/action/ActionView.tsx';
 import { getVSCodeAPI }  from './utils/vscode';
 import { now }           from './utils/helpers';
 
+import { DEFAULT_WORKFLOW_YAML } from './utils/defaultWorkflow';
+
 import type {
   TabName,
   ScoreData,
@@ -40,7 +42,7 @@ const App: React.FC = () => {
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
 
-  const [yaml, setYaml]                             = useState('');
+  const [yaml, setYaml]                             = useState(DEFAULT_WORKFLOW_YAML);
   const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
 
   useEffect(() => {

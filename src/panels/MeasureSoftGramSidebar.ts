@@ -53,21 +53,27 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     `;
     }
 
-    private async _runAction(yaml: string) {
+    private async _saveWorkflowFile(yaml: string): Promise<string> {
         const folder = workspace.workspaceFolders?.[0];
         if (!folder) {
-            window.showErrorMessage("Abra uma pasta/workspace antes de executar a action.");
-            return;
+            throw new Error("Abra uma pasta/workspace antes de salvar o workflow.");
         }
 
         const workspacePath = folder.uri.fsPath;
         const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
 
+        await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+        await fs.writeFile(workflowAbsPath, yaml, "utf-8");
+
+        return workspacePath;
+    }
+
+    private async _runAction(yaml: string) {
+        let workspacePath: string;
         try {
-            await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
-            await fs.writeFile(workflowAbsPath, yaml, "utf-8");
+            workspacePath = await this._saveWorkflowFile(yaml);
         } catch (err) {
-            window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
+            window.showErrorMessage(`${err}`);
             return;
         }
 
@@ -87,8 +93,19 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     }
 
     private _setWebviewMessageListener(webview: Webview) {
-        webview.onDidReceiveMessage((message: any) => {
+        webview.onDidReceiveMessage(async (message: any) => {
             switch (message.command) {
+
+                case "save_action": {
+                    try {
+                        await this._saveWorkflowFile(message.yaml);
+                        webview.postMessage({ command: "action_saved" });
+                    } catch (err) {
+                        window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
+                    }
+                    return;
+                }
+
                 case "run_action": {
                     this._runAction(message.yaml);
                     return;
