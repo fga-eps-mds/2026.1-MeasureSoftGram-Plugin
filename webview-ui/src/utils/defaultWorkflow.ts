@@ -10,15 +10,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Action MeasureSoftGram
-        uses: ./
+      - name: MeasureSoftGram
+        uses: fga-eps-mds/2023-1-MeasureSoftGram-Action@v2.1
         id: msgram
         with:
-          githubToken: \${{ secrets.GITHUB_TOKEN }} # Token do GitHub
-          sonarProjectKey: \${{ secrets.SONAR_TOKEN }} # (opcional) Chave do projeto no SonarQube
-          msgramServiceToken: \${{ secrets.MSGRAM_TOKEN }} # Token para acessar o serviço MeasureSoftGram
-          productName: "MeasureSoftGram" # Nome do produto
-          workflowName: 'Build' # Nome do seu worflow que realiza a build da release
+          githubToken: # Token do GitHub
+          sonarProjectKey: # Chave do projeto no SonarQube
+          msgramServiceToken: # Token para acessar o serviço MeasureSoftGram
+          productName: # Nome do produto
+          workflowName: # Nome do seu worflow que realiza a build da release
           collectSonarqubeMetrics: true # Flag que determina se métricas do Sonarqube serão persistidas
           collectGithubMetrics: true # Flag que determina se métricas do Github serão persistidas
           usLabel: "US"
