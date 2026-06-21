@@ -1,4 +1,4 @@
-import {Uri, Webview, WebviewView, WebviewViewProvider} from "vscode";
+import {Uri, Webview, WebviewView, WebviewViewProvider, window} from "vscode";
 import {getNonce, getUri} from "../utilities/utilities";
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
@@ -55,6 +55,12 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
             switch (message.command) {
                 case "hello":
                     return;
+                case "run_action": {
+                    const terminal = window.createTerminal({ name: "MeasureSoftGram" });
+                    terminal.show();
+                    terminal.sendText('echo "Hello World"');
+                    return;
+                }
             }
         });
     }
