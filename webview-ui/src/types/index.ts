@@ -15,20 +15,22 @@ export type PanelMessage =
     | { command: 'publish' }
     | { command: 'request_yaml' }
     | { command: 'save_action'; yaml: string }
-    | { command: 'save_settings'; data: SettingsData };
+    | { command: 'save_settings'; data: SettingsData }
+    | { command: 'show_warning'; message: string };
 
 export type ExtensionMessage =
-  | { command: 'score_loading' }
-  | { command: 'score_loaded'; data: ScoreData }
-  | { command: 'score_error'; message: string }
-  | { command: 'analysis_started' }
-  | { command: 'output_line'; line: string; isError: boolean }
-  | { command: 'analysis_done'; success: boolean; exitCode: number }
-  | { command: 'analysis_stopped' }
-  | { command: 'yaml_loaded'; yaml: string }
-  | { command: 'action_saved' }
-  | { command: 'published'; release: string }
-  | { command: 'settings_saved' };
+    | { command: 'score_loading' }
+    | { command: 'score_loaded'; data: ScoreData }
+    | { command: 'score_error'; message: string }
+    | { command: 'analysis_started' }
+    | { command: 'output_line'; line: string; isError: boolean }
+    | { command: 'analysis_done'; success: boolean; exitCode: number }
+    | { command: 'analysis_stopped' }
+    | { command: 'yaml_loaded'; yaml: string }
+    | { command: 'action_saved' }
+    | { command: 'published'; release: string }
+    | { command: 'settings_saved' }
+    | { command: 'settings_loaded'; data: Partial<SettingsData> };
 
 export interface Characteristic {
   name: string;
@@ -42,9 +44,12 @@ export interface ScoreData {
 }
 
 export interface SettingsData {
-  token: string;
-  productName: string;
   serviceUrl: string;
+  msgramServiceToken: string;
+  githubToken: string;
+  sonarProjectKey: string;
+  productName: string;
+  workflowName: string;
 }
 
 export type TabName = 'dashboard' | 'output' | 'settings' | 'action';

@@ -8,6 +8,8 @@ import { getVSCodeAPI }  from './utils/vscode';
 import { now }           from './utils/helpers';
 
 import { DEFAULT_WORKFLOW_YAML } from './utils/defaultWorkflow';
+import { applySettingsToYaml }   from './utils/workflowYaml';
+import { getMissingSettings }    from './utils/validation';
 
 import type {
   TabName,
@@ -42,8 +44,12 @@ const App: React.FC = () => {
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
 
+  const [settings, setSettings] = useState<Partial<SettingsData>>({});
+
   const [yaml, setYaml]                             = useState(DEFAULT_WORKFLOW_YAML);
   const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
+
+  const [actionAlert, setActionAlert] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (event: MessageEvent<ExtensionMessage>) => {
@@ -102,6 +108,12 @@ const App: React.FC = () => {
           setSettingsSavedFeedback(true);
           setTimeout(() => setSettingsSavedFeedback(false), 3000);
           break;
+
+          // Disparado pela extensão ao abrir o painel, com as settings
+          // já salvas anteriormente (tokens não vêm em texto puro, só os demais campos)
+        case 'settings_loaded':
+          setSettings(msg.data);
+          break;
       }
     };
 
@@ -118,15 +130,33 @@ const App: React.FC = () => {
   };
 
   const handleSaveSettings = (data: SettingsData) => {
+    setSettings(data);
     vscode.postMessage({ command: 'save_settings', data });
   };
 
   const handleSaveAction = () => {
-    vscode.postMessage({ command: 'save_action', yaml });
+    const mergedYaml = applySettingsToYaml(yaml, settings);
+    setYaml(mergedYaml);
+    vscode.postMessage({ command: 'save_action', yaml: mergedYaml });
   };
 
   const handleRunAction = () => {
-    vscode.postMessage({ command: 'run_action', yaml });
+    const missing = getMissingSettings(settings);
+
+    if (missing.length > 0) {
+      const message =
+          `Preencha os campos obrigatórios em Settings antes de rodar a pipeline: ` +
+          missing.map((m) => m.label).join(', ');
+
+      setActionAlert(message);
+      vscode.postMessage({ command: 'show_warning', message });
+      return; // bloqueia a execução
+    }
+
+    setActionAlert(null);
+    const mergedYaml = applySettingsToYaml(yaml, settings);
+    setYaml(mergedYaml);
+    vscode.postMessage({ command: 'run_action', yaml: mergedYaml });
   };
 
   return (
@@ -162,6 +192,7 @@ const App: React.FC = () => {
 
           {activeTab === 'settings' && (
               <SettingsView
+                  initialData={settings}
                   onSave={handleSaveSettings}
                   savedFeedback={settingsSavedFeedback}
               />
@@ -175,6 +206,7 @@ const App: React.FC = () => {
                   savedFeedback={actionSavedFeedback}
                   onRun={handleRunAction}
                   running={isRunning}
+                  alert={actionAlert}
               />
           )}
 
