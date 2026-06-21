@@ -9,12 +9,13 @@ declare global {
 }
 
 export type PanelMessage =
-  | { command: 'run_analysis' }
-  | { command: 'stop_analysis' } | { command: 'run_action' }
-  | { command: 'publish' }
-  | { command: 'request_yaml' }
-  | { command: 'save_action'; yaml: string }
-  | { command: 'save_settings'; data: SettingsData };
+    | { command: 'run_analysis' }
+    | { command: 'stop_analysis' }
+    | { command: 'run_action'; yaml: string }
+    | { command: 'publish' }
+    | { command: 'request_yaml' }
+    | { command: 'save_action'; yaml: string }
+    | { command: 'save_settings'; data: SettingsData };
 
 export type ExtensionMessage =
   | { command: 'score_loading' }

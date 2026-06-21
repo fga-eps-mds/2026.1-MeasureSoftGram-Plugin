@@ -1,12 +1,15 @@
-import {Uri, Webview, WebviewView, WebviewViewProvider, window} from "vscode";
+import {Uri, Webview, WebviewView, WebviewViewProvider, window, workspace} from "vscode";
 import {getNonce, getUri} from "../utilities/utilities";
+import * as fs from "fs/promises";
+import * as path from "path";
+
+const WORKFLOW_REL_PATH = ".github/workflows/msgram.yml";
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
     public static readonly viewType = "msgram.sidebarView";
     private _view?: WebviewView;
 
-    constructor(private readonly _extensionUri: Uri) {
-    }
+    constructor(private readonly _extensionUri: Uri) {}
 
     public resolveWebviewView(webviewView: WebviewView) {
         this._view = webviewView;
@@ -50,15 +53,44 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     `;
     }
 
+    private async _runAction(yaml: string) {
+        const folder = workspace.workspaceFolders?.[0];
+        if (!folder) {
+            window.showErrorMessage("Abra uma pasta/workspace antes de executar a action.");
+            return;
+        }
+
+        const workspacePath = folder.uri.fsPath;
+        const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
+
+        try {
+            await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+            await fs.writeFile(workflowAbsPath, yaml, "utf-8");
+        } catch (err) {
+            window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
+            return;
+        }
+
+        const dockerDir = Uri.joinPath(this._extensionUri, "resources", "docker").fsPath;
+
+        const terminal = window.createTerminal({
+            name: "MeasureSoftGram · Act",
+            cwd: dockerDir,
+            env: {
+                WORKSPACE_PATH: workspacePath,
+                WORKFLOW_REL_PATH: WORKFLOW_REL_PATH,
+            },
+        });
+
+        terminal.show();
+        terminal.sendText("docker compose up --build --abort-on-container-exit");
+    }
+
     private _setWebviewMessageListener(webview: Webview) {
         webview.onDidReceiveMessage((message: any) => {
             switch (message.command) {
-                case "hello":
-                    return;
                 case "run_action": {
-                    const terminal = window.createTerminal({ name: "MeasureSoftGram" });
-                    terminal.show();
-                    terminal.sendText('echo "Hello World"');
+                    this._runAction(message.yaml);
                     return;
                 }
             }

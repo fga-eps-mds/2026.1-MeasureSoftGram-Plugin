@@ -124,7 +124,7 @@ const App: React.FC = () => {
   };
 
   const handleRunAction = () => {
-    vscode.postMessage({ command: 'run_action' });
+    vscode.postMessage({ command: 'run_action', yaml });
   };
 
   return (
