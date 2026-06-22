@@ -38,5 +38,35 @@ describe('applySettingsToYaml', () => {
         expect(result).toContain('workflowName: "Build"');
     });
 
-    
+    it('não deve substituir campo quando valor é undefined', () => {
+        const original = DEFAULT_WORKFLOW_YAML;
+        const result = applySettingsToYaml(original, {});
+        expect(result).toBe(original);
+    });
+
+    it('deve preservar comentários da linha ao substituir', () => {
+        const yaml = `        githubToken: # Token do GitHub`;
+        const result = applySettingsToYaml(yaml, { githubToken: 'token' });
+        expect(result).toContain('# Token do GitHub');
+        expect(result).toContain('${{ secrets.GITHUB_TOKEN }}');
+    });
+
+    it('deve substituir múltiplos campos de uma vez', () => {
+        const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
+            githubToken: 'token',
+            productName: 'produto',
+            workflowName: 'Build',
+        });
+        expect(result).toContain('githubToken: ${{ secrets.GITHUB_TOKEN }}');
+        expect(result).toContain('productName: "produto"');
+        expect(result).toContain('workflowName: "Build"');
+    });
+
+    it('deve preservar linhas não relacionadas às configurações', () => {
+        const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
+            githubToken: 'token',
+        });
+        expect(result).toContain('runs-on: ubuntu-latest');
+        expect(result).toContain('uses: actions/checkout@v3');
+    });
 });
