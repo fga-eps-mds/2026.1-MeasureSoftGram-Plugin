@@ -17,5 +17,12 @@ describe('applySettingsToYaml', () => {
         expect(result).toContain('msgramServiceToken: ${{ secrets.MSGRAM_TOKEN }}');
     });
 
-    
+    it('deve substituir sonarProjectKey com aspas quando preenchido', () => {
+        const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
+            sonarProjectKey: 'meu-projeto',
+        });
+        expect(result).toContain('sonarProjectKey: "meu-projeto"');
+    });
+
+   
 });
