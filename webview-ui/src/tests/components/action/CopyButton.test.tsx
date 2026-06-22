@@ -27,5 +27,11 @@ describe('CopyButton', () => {
         expect(writeText).toHaveBeenCalledWith('conteúdo copiado');
     });
 
-    
+    it('deve mudar o texto para "Copiado" após clicar', () => {
+        render(<CopyButton getValue={getValue}/>);
+        fireEvent.click(screen.getByRole('button'));
+        expect(screen.getByRole('button')).toHaveTextContent('Copiado');
+    });
+
+
 });
