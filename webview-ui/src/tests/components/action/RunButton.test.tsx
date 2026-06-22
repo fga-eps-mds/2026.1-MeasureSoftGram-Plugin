@@ -43,5 +43,13 @@ describe('RunButton', () => {
         expect(onRun).not.toHaveBeenCalled();
     });
 
+    it('deve exibir ícone de play quando não está rodando', () => {
+        render(<RunButton onRun={onRun} running={false} />);
+        expect(screen.getByRole('button').querySelector('i')).toHaveClass('ti-player-play');
+    });
 
+    it('deve exibir ícone de loader quando está rodando', () => {
+        render(<RunButton onRun={onRun} running={true} />);
+        expect(screen.getByRole('button').querySelector('i')).toHaveClass('ti-loader-2');
+    });
 });
