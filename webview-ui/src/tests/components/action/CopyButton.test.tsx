@@ -50,5 +50,12 @@ describe('CopyButton', () => {
         vi.useRealTimers();
     });
 
-   
+    it('não deve quebrar se clipboard não estiver disponível', () => {
+        Object.assign(navigator, {clipboard: undefined});
+
+        render(<CopyButton getValue={getValue}/>);
+
+        expect(() => fireEvent.click(screen.getByRole('button'))).not.toThrow();
+    });
+    
 });
