@@ -14,5 +14,18 @@ describe('CopyButton', () => {
         expect(screen.getByRole('button')).toHaveTextContent('Copiar');
     });
 
+    it('deve chamar getValue e escrever no clipboard ao clicar', async () => {
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        Object.assign(navigator, {
+            clipboard: {writeText},
+        });
 
+        render(<CopyButton getValue={getValue}/>);
+        fireEvent.click(screen.getByRole('button'));
+
+        expect(getValue).toHaveBeenCalledTimes(1);
+        expect(writeText).toHaveBeenCalledWith('conteúdo copiado');
+    });
+
+    
 });
