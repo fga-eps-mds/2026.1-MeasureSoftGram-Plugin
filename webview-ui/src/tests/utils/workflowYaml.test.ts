@@ -24,5 +24,12 @@ describe('applySettingsToYaml', () => {
         expect(result).toContain('sonarProjectKey: "meu-projeto"');
     });
 
-   
+    it('deve substituir productName com aspas quando preenchido', () => {
+        const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
+            productName: 'meu-produto',
+        });
+        expect(result).toContain('productName: "meu-produto"');
+    });
+
+    
 });
