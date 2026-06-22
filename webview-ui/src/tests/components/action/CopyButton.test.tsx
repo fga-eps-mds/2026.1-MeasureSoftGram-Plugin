@@ -33,5 +33,22 @@ describe('CopyButton', () => {
         expect(screen.getByRole('button')).toHaveTextContent('Copiado');
     });
 
+    it('deve voltar para "Copiar" após 1500ms', async () => {
+        vi.useFakeTimers();
 
+        render(<CopyButton getValue={getValue}/>);
+        fireEvent.click(screen.getByRole('button'));
+
+        expect(screen.getByRole('button')).toHaveTextContent('Copiado');
+
+        await act(async () => {
+            vi.advanceTimersByTime(1500);
+        });
+
+        expect(screen.getByRole('button')).toHaveTextContent('Copiar');
+
+        vi.useRealTimers();
+    });
+
+   
 });
