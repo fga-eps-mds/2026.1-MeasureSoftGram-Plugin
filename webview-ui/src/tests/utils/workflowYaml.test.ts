@@ -10,5 +10,12 @@ describe('applySettingsToYaml', () => {
         expect(result).toContain('githubToken: ${{ secrets.GITHUB_TOKEN }}');
     });
 
+    it('deve substituir msgramServiceToken pelo secret quando preenchido', () => {
+        const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
+            msgramServiceToken: 'meu-token',
+        });
+        expect(result).toContain('msgramServiceToken: ${{ secrets.MSGRAM_TOKEN }}');
+    });
 
+    
 });
