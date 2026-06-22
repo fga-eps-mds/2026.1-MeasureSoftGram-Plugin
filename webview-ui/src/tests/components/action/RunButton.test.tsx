@@ -21,5 +21,15 @@ describe('RunButton', () => {
         expect(screen.getByRole('button')).toHaveTextContent('Executando...');
     });
 
+    it('deve estar habilitado quando running é false', () => {
+        render(<RunButton onRun={onRun} running={false} />);
+        expect(screen.getByRole('button')).not.toBeDisabled();
+    });
+
+    it('deve estar desabilitado quando running é true', () => {
+        render(<RunButton onRun={onRun} running={true} />);
+        expect(screen.getByRole('button')).toBeDisabled();
+    });
+
 
 });
