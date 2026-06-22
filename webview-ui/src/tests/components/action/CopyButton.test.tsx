@@ -57,5 +57,35 @@ describe('CopyButton', () => {
 
         expect(() => fireEvent.click(screen.getByRole('button'))).not.toThrow();
     });
-    
+
+    it('não deve quebrar se btnRef for null no momento do reset', async () => {
+        vi.useFakeTimers();
+
+        const {unmount} = render(<CopyButton getValue={getValue}/>);
+        fireEvent.click(screen.getByRole('button'));
+
+        unmount();
+
+        await act(async () => {
+            vi.advanceTimersByTime(1500);
+        });
+
+        vi.useRealTimers();
+    });
+
+    it('deve continuar funcionando se clipboard.writeText rejeitar', async () => {
+        const writeText = vi.fn().mockRejectedValue(new Error('permission denied'));
+        Object.assign(navigator, {
+            clipboard: {writeText},
+        });
+
+        render(<CopyButton getValue={getValue}/>);
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button'));
+        });
+
+        expect(writeText).toHaveBeenCalledWith('conteúdo copiado');
+        expect(screen.getByRole('button')).toHaveTextContent('Copiado');
+    });
 });
