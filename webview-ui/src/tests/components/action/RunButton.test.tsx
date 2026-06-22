@@ -31,5 +31,17 @@ describe('RunButton', () => {
         expect(screen.getByRole('button')).toBeDisabled();
     });
 
+    it('deve chamar onRun ao clicar quando não está rodando', () => {
+        render(<RunButton onRun={onRun} running={false} />);
+        fireEvent.click(screen.getByRole('button'));
+        expect(onRun).toHaveBeenCalledTimes(1);
+    });
+
+    it('não deve chamar onRun ao clicar quando está desabilitado', async () => {
+        render(<RunButton onRun={onRun} running={true} />);
+        await userEvent.click(screen.getByRole('button'));
+        expect(onRun).not.toHaveBeenCalled();
+    });
+
 
 });
