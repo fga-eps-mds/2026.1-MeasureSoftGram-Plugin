@@ -1,12 +1,15 @@
-import {Uri, Webview, WebviewView, WebviewViewProvider} from "vscode";
+import {Uri, Webview, WebviewView, WebviewViewProvider, window, workspace} from "vscode";
 import {getNonce, getUri} from "../utilities/utilities";
+import * as fs from "fs/promises";
+import * as path from "path";
+
+const WORKFLOW_REL_PATH = ".github/workflows/msgram.yml";
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
     public static readonly viewType = "msgram.sidebarView";
     private _view?: WebviewView;
 
-    constructor(private readonly _extensionUri: Uri) {
-    }
+    constructor(private readonly _extensionUri: Uri) {}
 
     public resolveWebviewView(webviewView: WebviewView) {
         this._view = webviewView;
@@ -50,11 +53,63 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     `;
     }
 
+    private async _saveWorkflowFile(yaml: string): Promise<string> {
+        const folder = workspace.workspaceFolders?.[0];
+        if (!folder) {
+            throw new Error("Abra uma pasta/workspace antes de salvar o workflow.");
+        }
+
+        const workspacePath = folder.uri.fsPath;
+        const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
+
+        await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+        await fs.writeFile(workflowAbsPath, yaml, "utf-8");
+
+        return workspacePath;
+    }
+
+    private async _runAction(yaml: string) {
+        let workspacePath: string;
+        try {
+            workspacePath = await this._saveWorkflowFile(yaml);
+        } catch (err) {
+            window.showErrorMessage(`${err}`);
+            return;
+        }
+
+        const dockerDir = Uri.joinPath(this._extensionUri, "resources", "docker").fsPath;
+
+        const terminal = window.createTerminal({
+            name: "MeasureSoftGram · Act",
+            cwd: dockerDir,
+            env: {
+                WORKSPACE_PATH: workspacePath,
+                WORKFLOW_REL_PATH: WORKFLOW_REL_PATH,
+            },
+        });
+
+        terminal.show();
+        terminal.sendText("docker compose up --build --abort-on-container-exit");
+    }
+
     private _setWebviewMessageListener(webview: Webview) {
-        webview.onDidReceiveMessage((message: any) => {
+        webview.onDidReceiveMessage(async (message: any) => {
             switch (message.command) {
-                case "hello":
+
+                case "save_action": {
+                    try {
+                        await this._saveWorkflowFile(message.yaml);
+                        webview.postMessage({ command: "action_saved" });
+                    } catch (err) {
+                        window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
+                    }
                     return;
+                }
+
+                case "run_action": {
+                    this._runAction(message.yaml);
+                    return;
+                }
             }
         });
     }

@@ -9,7 +9,6 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: 'dashboard', label: 'Painel',  icon: 'ti-chart-radar' },
-  { id: 'output',    label: 'Output',  icon: 'ti-terminal' },
   { id: 'settings',  label: 'Config',  icon: 'ti-settings' },
   { id: 'action',    label: 'Action',  icon: 'ti-file-code' },
 ];
