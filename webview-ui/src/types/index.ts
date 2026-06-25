@@ -9,28 +9,36 @@ declare global {
 }
 
 export type PanelMessage =
-    | { command: 'run_analysis' }
-    | { command: 'stop_analysis' }
-    | { command: 'run_action'; yaml: string }
-    | { command: 'publish' }
-    | { command: 'request_yaml' }
-    | { command: 'save_action'; yaml: string }
-    | { command: 'save_settings'; data: SettingsData }
-    | { command: 'show_warning'; message: string };
+  | { command: 'run_analysis' }
+  | { command: 'stop_analysis' }
+  | { command: 'run_action'; yaml: string }
+  | { command: 'publish' }
+  | { command: 'request_yaml' }
+  | { command: 'request_score' }
+  | { command: 'select_repo'; repoPk: number }
+  | { command: 'save_action'; yaml: string }
+  | { command: 'save_settings'; data: SettingsData }
+  | { command: 'show_warning'; message: string };
 
 export type ExtensionMessage =
-    | { command: 'score_loading' }
-    | { command: 'score_loaded'; data: ScoreData }
-    | { command: 'score_error'; message: string }
-    | { command: 'analysis_started' }
-    | { command: 'output_line'; line: string; isError: boolean }
-    | { command: 'analysis_done'; success: boolean; exitCode: number }
-    | { command: 'analysis_stopped' }
-    | { command: 'yaml_loaded'; yaml: string }
-    | { command: 'action_saved' }
-    | { command: 'published'; release: string }
-    | { command: 'settings_saved' }
-    | { command: 'settings_loaded'; data: Partial<SettingsData> };
+  | { command: 'score_loading' }
+  | { command: 'score_loaded'; data: ScoreData }
+  | { command: 'score_error'; message: string }
+  | { command: 'repos_loaded'; repos: RepoItem[] }
+  | { command: 'analysis_started' }
+  | { command: 'output_line'; line: string; isError: boolean }
+  | { command: 'analysis_done'; success: boolean; exitCode: number }
+  | { command: 'analysis_stopped' }
+  | { command: 'yaml_loaded'; yaml: string }
+  | { command: 'action_saved' }
+  | { command: 'published'; release: string }
+  | { command: 'settings_saved' }
+  | { command: 'settings_loaded'; data: Partial<SettingsData> };
+
+export interface RepoItem {
+  id: number;
+  name: string;
+}
 
 export interface Characteristic {
   name: string;
@@ -41,6 +49,7 @@ export interface Characteristic {
 export interface ScoreData {
   score: number;
   characteristics: Characteristic[];
+  noData?: boolean;
 }
 
 export interface SettingsData {
