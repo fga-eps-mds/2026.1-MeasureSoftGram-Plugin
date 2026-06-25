@@ -10,13 +10,15 @@ declare global {
 
 export type PanelMessage =
   | { command: 'run_analysis' }
-  | { command: 'stop_analysis' } | { command: 'run_action' }
+  | { command: 'stop_analysis' }
+  | { command: 'run_action'; yaml: string }
   | { command: 'publish' }
   | { command: 'request_yaml' }
   | { command: 'request_score' }
   | { command: 'select_repo'; repoPk: number }
   | { command: 'save_action'; yaml: string }
-  | { command: 'save_settings'; data: SettingsData };
+  | { command: 'save_settings'; data: SettingsData }
+  | { command: 'show_warning'; message: string };
 
 export type ExtensionMessage =
   | { command: 'score_loading' }
@@ -30,7 +32,8 @@ export type ExtensionMessage =
   | { command: 'yaml_loaded'; yaml: string }
   | { command: 'action_saved' }
   | { command: 'published'; release: string }
-  | { command: 'settings_saved' };
+  | { command: 'settings_saved' }
+  | { command: 'settings_loaded'; data: Partial<SettingsData> };
 
 export interface RepoItem {
   id: number;
@@ -50,9 +53,12 @@ export interface ScoreData {
 }
 
 export interface SettingsData {
-  token: string;
-  productName: string;
   serviceUrl: string;
+  msgramServiceToken: string;
+  githubToken: string;
+  sonarProjectKey: string;
+  productName: string;
+  workflowName: string;
 }
 
 export type TabName = 'dashboard' | 'output' | 'settings' | 'action';

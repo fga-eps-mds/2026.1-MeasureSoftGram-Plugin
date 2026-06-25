@@ -42,7 +42,11 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "test:unit": "npm run compile && mocha --ui tdd --timeout 10000 'out/test/suite/**/*.test.js'",
-    "test:coverage": "npm run compile && c8 --reporter=lcov --reporter=text mocha --ui tdd --timeout 10000 'out/test/suite/**/*.test.js'"
+    "test:coverage": "npm run compile && c8 --reporter=lcov --reporter=text mocha --ui tdd --timeout 10000 'out/test/suite/**/*.test.js'",
+    "test:webview-run": "cd webview-ui && npm run test:run",
+    "test:webview-watch": "cd webview-ui && npm run test:watch",
+    "test:webview-coverage": "cd webview-ui && npm run test:coverage",
+    "test:all": "npm run test:webview-run && npm test"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

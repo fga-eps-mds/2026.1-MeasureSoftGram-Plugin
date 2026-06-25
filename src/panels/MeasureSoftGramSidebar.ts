@@ -1,6 +1,10 @@
-import { OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window } from 'vscode';
+import { OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
 import { getNonce, getUri } from '../utilities/utilities';
 import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+const WORKFLOW_REL_PATH = '.github/workflows/msgram.yml';
 
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
   public static readonly viewType = 'msgram.sidebarView';
@@ -84,6 +88,45 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     }
   }
 
+  private async _saveWorkflowFile(yaml: string): Promise<string> {
+    const folder = workspace.workspaceFolders?.[0];
+    if (!folder) {
+      throw new Error('Abra uma pasta/workspace antes de salvar o workflow.');
+    }
+
+    const workspacePath = folder.uri.fsPath;
+    const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
+
+    await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+    await fs.writeFile(workflowAbsPath, yaml, 'utf-8');
+
+    return workspacePath;
+  }
+
+  private async _runAction(yaml: string) {
+    let workspacePath: string;
+    try {
+      workspacePath = await this._saveWorkflowFile(yaml);
+    } catch (err) {
+      window.showErrorMessage(`${err}`);
+      return;
+    }
+
+    const dockerDir = Uri.joinPath(this._extensionUri, 'resources', 'docker').fsPath;
+
+    const terminal = window.createTerminal({
+      name: 'MeasureSoftGram · Act',
+      cwd: dockerDir,
+      env: {
+        WORKSPACE_PATH: workspacePath,
+        WORKFLOW_REL_PATH: WORKFLOW_REL_PATH,
+      },
+    });
+
+    terminal.show();
+    terminal.sendText('docker compose up --build --abort-on-container-exit');
+  }
+
   private _getWebviewContent(webview: Webview, extensionUri: Uri) {
     const stylesUri = getUri(webview, extensionUri, ['webview-ui', 'build', 'assets', 'index.css']);
     const scriptUri = getUri(webview, extensionUri, ['webview-ui', 'build', 'assets', 'index.js']);
@@ -130,6 +173,20 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
           this._selectedRepo = null;
           webview.postMessage({ command: 'settings_saved' });
           await this._loadReposAndScore();
+          break;
+
+        case 'save_action': {
+          try {
+            await this._saveWorkflowFile(message.yaml);
+            webview.postMessage({ command: 'action_saved' });
+          } catch (err) {
+            window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
+          }
+          break;
+        }
+
+        case 'run_action':
+          this._runAction(message.yaml);
           break;
       }
     });
