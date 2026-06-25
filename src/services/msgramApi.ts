@@ -1,5 +1,5 @@
-import * as https from 'https';
-import * as http from 'http';
+import * as https from 'node:https';
+import * as http from 'node:http';
 
 export type Logger = (message: string) => void;
 
@@ -42,9 +42,9 @@ const MOCK_REPOS: RepoItem[] = [
 const MOCK_SCORE: ScoreData = {
   score: 0.94,
   characteristics: [
-    { name: 'Reliability',     value: 0.82, goal: 0.80 },
+    { name: 'Reliability',     value: 0.82, goal: 0.8 },
     { name: 'Maintainability', value: 0.68, goal: 0.75 },
-    { name: 'Security',        value: 0.71, goal: 0.70 },
+    { name: 'Security',        value: 0.71, goal: 0.7 },
   ],
 };
 

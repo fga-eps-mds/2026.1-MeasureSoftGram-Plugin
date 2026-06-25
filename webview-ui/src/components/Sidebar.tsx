@@ -28,6 +28,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isRunning,
   onShowTab,
 }) => {
+  const renderCharsContent = (): React.ReactNode => {
+    if (scoreLoading || !scoreData) {
+      return (
+        <div className="srow" style={{ padding: '6px 0' }}>
+          <i className="ti ti-loader run-anim" style={{ color: '#666', fontSize: 13 }} />
+          <span className="stxt">carregando...</span>
+        </div>
+      );
+    }
+    if (scoreData.noData) {
+      return (
+        <div className="srow" style={{ padding: '6px 0', color: '#888', fontSize: 11 }}>
+          <i className="ti ti-mood-empty" style={{ marginRight: 4 }} />
+          <span className="stxt">nenhum dado disponível</span>
+        </div>
+      );
+    }
+    return scoreData.characteristics.map((c) => {
+      const status = getCharStatus(c.value, c.goal);
+      const color = getStatusColor(status);
+      return (
+        <React.Fragment key={c.name}>
+          <div className="mrow" onClick={() => onShowTab('dashboard')}>
+            <div className="mn">
+              <i className={`ti ti-chart-dots ${status}`} /> {c.name}
+            </div>
+            <span className={`mv ${status}`}>{c.value.toFixed(2)}</span>
+          </div>
+          <div className="bar">
+            <div className="barbg">
+              <div className="barfill" style={{ width: `${(c.value * 100).toFixed(0)}%`, background: color }} />
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    });
+  };
+
   return (
     <div className="sh">
       <div className="st">MSGRAM — qualidade local</div>
@@ -108,37 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div id="chars-sidebar">
-          {scoreLoading || !scoreData ? (
-            <div className="srow" style={{ padding: '6px 0' }}>
-              <i className="ti ti-loader run-anim" style={{ color: '#666', fontSize: 13 }} />
-              <span className="stxt">carregando...</span>
-            </div>
-          ) : scoreData.noData ? (
-            <div className="srow" style={{ padding: '6px 0', color: '#888', fontSize: 11 }}>
-              <i className="ti ti-mood-empty" style={{ marginRight: 4 }} />
-              <span className="stxt">nenhum dado disponível</span>
-            </div>
-          ) : (
-            scoreData.characteristics.map((c) => {
-              const status = getCharStatus(c.value, c.goal);
-              const color = getStatusColor(status);
-              return (
-                <React.Fragment key={c.name}>
-                  <div className="mrow" onClick={() => onShowTab('dashboard')}>
-                    <div className="mn">
-                      <i className={`ti ti-chart-dots ${status}`} /> {c.name}
-                    </div>
-                    <span className={`mv ${status}`}>{c.value.toFixed(2)}</span>
-                  </div>
-                  <div className="bar">
-                    <div className="barbg">
-                      <div className="barfill" style={{ width: `${(c.value * 100).toFixed(0)}%`, background: color }} />
-                    </div>
-                  </div>
-                </React.Fragment>
-              );
-            })
-          )}
+          {renderCharsContent()}
         </div>
 
         <div className="divider" style={{ marginTop: 8 }} />

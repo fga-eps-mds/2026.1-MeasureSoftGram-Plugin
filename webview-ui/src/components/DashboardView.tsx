@@ -37,6 +37,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const productLabel = productName || 'sem produto configurado';
 
+  let metaStatus: React.ReactNode = '—';
+  if (scoreData) {
+    metaStatus = score >= avgGoal
+      ? <span className="ok">acima ✓</span>
+      : <span className="fail">abaixo ✗</span>;
+  }
+
   return (
     <div className="vw on" id="view-dashboard">
       {/* Header */}
@@ -115,11 +122,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <div className="hero-meta">
               meta da release: {avgGoal.toFixed(2)} ·{' '}
-              {scoreData
-                ? score >= avgGoal
-                  ? <span className="ok">acima ✓</span>
-                  : <span className="fail">abaixo ✗</span>
-                : '—'}
+              {metaStatus}
             </div>
           </div>
         </div>

@@ -6,7 +6,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
   public static readonly viewType = 'msgram.sidebarView';
   private _view?: WebviewView;
   private _settings: MsgramSettings = { serviceUrl: '', token: '', productName: '' };
-  private _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
+  private readonly _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
   private _context: RepoContext | null = null;
   private _selectedRepo: RepoItem | null = null;
 
