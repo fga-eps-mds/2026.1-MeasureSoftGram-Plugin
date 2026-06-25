@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { SettingsData } from '../types';
 
 interface SettingsViewProps {
@@ -18,6 +18,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [sonarProjectKey, setSonarProjectKey] = useState(initialData.sonarProjectKey ?? '');
   const [productName, setProductName] = useState(initialData.productName ?? '');
   const [workflowName, setWorkflowName] = useState(initialData.workflowName ?? 'Build');
+
+  useEffect(() => {
+    if (!initialData) { return; }
+    setServiceUrl(initialData.serviceUrl ?? '');
+    setMsgramServiceToken(initialData.msgramServiceToken ?? '');
+    setGithubToken(initialData.githubToken ?? '');
+    setSonarProjectKey(initialData.sonarProjectKey ?? '');
+    setProductName(initialData.productName ?? '');
+    setWorkflowName(initialData.workflowName ?? 'Build');
+  }, [initialData]);
 
   const handleSave = () => {
     onSave({

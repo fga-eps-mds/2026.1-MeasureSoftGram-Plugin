@@ -83,6 +83,7 @@ const App: React.FC = () => {
 
         case 'score_error':
           setScoreLoading(false);
+          setScoreData(null);
           setNotifText(msg.message);
           setNotifType('error');
           break;
@@ -225,6 +226,7 @@ const App: React.FC = () => {
 
         {activeTab === 'settings' && (
           <SettingsView
+            initialData={settings}
             onSave={handleSaveSettings}
             savedFeedback={settingsSavedFeedback}
           />
