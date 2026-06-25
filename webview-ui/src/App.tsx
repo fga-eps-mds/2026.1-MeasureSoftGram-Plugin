@@ -34,7 +34,6 @@ const App: React.FC = () => {
 
   const [scoreData, setScoreData]           = useState<ScoreData | null>(null);
   const [scoreLoading, setScoreLoading]     = useState(true);
-  const [scoreError, setScoreError]         = useState<string | null>(null);
   const [repos, setRepos]                   = useState<RepoItem[]>([]);
   const [selectedRepoPk, setSelectedRepoPk] = useState<number | null>(null);
   const [notifText, setNotifText]           = useState('');
@@ -74,18 +73,16 @@ const App: React.FC = () => {
 
         case 'score_loading':
           setScoreLoading(true);
-          setScoreError(null);
           break;
 
         case 'score_loaded':
           setScoreLoading(false);
-          setScoreError(null);
+          setNotifText('');
           setScoreData(msg.data);
           break;
 
         case 'score_error':
           setScoreLoading(false);
-          setScoreError(msg.message);
           setNotifText(msg.message);
           setNotifType('error');
           break;
@@ -212,7 +209,6 @@ const App: React.FC = () => {
           <DashboardView
             scoreData={scoreData}
             scoreLoading={scoreLoading}
-            scoreError={scoreError}
             productName={settings.productName ?? ''}
             showCommitWarn={showCommitWarn}
             notifText={notifText}

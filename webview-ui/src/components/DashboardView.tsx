@@ -6,7 +6,6 @@ interface DashboardViewProps {
   scoreData: ScoreData | null;
   scoreLoading: boolean;
   productName: string;
-  scoreError: string | null;
   showCommitWarn: boolean;
   notifText: string;
   notifType: 'ok' | 'error';
@@ -19,7 +18,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   scoreData,
   scoreLoading,
   productName,
-  scoreError,
   showCommitWarn,
   notifText,
   notifType,
@@ -109,32 +107,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Score hero */}
       {!scoreLoading && (
-        scoreError ? (
-          <div className="notif warn-n" style={{ marginBottom: 14 }}>
-            <i className="ti ti-alert-circle" style={{ color: '#cca700' }} />
-            <span>{scoreError}</span>
+        <div className="score-hero">
+          <div className="hero-num" id="hero-score">
+            {scoreData ? score.toFixed(2) : '—'}
           </div>
-        ) : (
-          <div className="score-hero">
-            <div className="hero-num" id="hero-score">
-              {scoreData ? score.toFixed(2) : '—'}
+          <div className="hero-right">
+            <div className="hero-lbl">Nota geral do produto — R2025.1</div>
+            <div className="hero-bar">
+              <div
+                className="hero-fill"
+                id="hero-fill"
+                style={{ width: `${scorePct}%` }}
+              />
             </div>
-            <div className="hero-right">
-              <div className="hero-lbl">Nota geral do produto — R2025.1</div>
-              <div className="hero-bar">
-                <div
-                  className="hero-fill"
-                  id="hero-fill"
-                  style={{ width: `${scorePct}%` }}
-                />
-              </div>
-              <div className="hero-meta">
-                meta da release: {avgGoal.toFixed(2)} ·{' '}
-                {metaStatus}
-              </div>
+            <div className="hero-meta">
+              meta da release: {avgGoal.toFixed(2)} ·{' '}
+              {metaStatus}
             </div>
           </div>
-        )
+        </div>
       )}
 
       <div id="chars-dashboard">
