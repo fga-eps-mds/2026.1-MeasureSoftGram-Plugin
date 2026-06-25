@@ -193,7 +193,7 @@ export async function fetchScoreForRepo(
     get<{ results: CharItem[] }>(charsUrl, settings.token),
   ]);
 
-  if (tsqmi.value == null) {
+  if (tsqmi.value === null || tsqmi.value === undefined) {
     log(`[${ts()}] Repositório "${repoName}" ainda não possui TSQMI calculado.`);
     return { score: 0, characteristics: [], noData: true };
   }
