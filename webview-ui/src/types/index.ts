@@ -10,7 +10,7 @@ declare global {
 
 export type PanelMessage =
   | { command: 'run_analysis' }
-  | { command: 'stop_analysis' }
+  | { command: 'stop_analysis' } | { command: 'run_action' }
   | { command: 'publish' }
   | { command: 'request_yaml' }
   | { command: 'request_score' }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import type { LogLine } from '../types';
-import { escHtml } from '../utils/helpers';
+import type { LogLine } from '../../types';
+import { escHtml } from '../../utils/helpers.ts';
 
 interface OutputViewProps {
   lines: LogLine[];

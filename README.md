@@ -166,9 +166,9 @@ Quando o plugin é aberto **sem** as configurações preenchidas, ele exibe auto
 | Campo | Valor mock |
 |---|---|
 | Score (TSQMI) | `0.94` |
-| Reliability | `0.82` (meta 0.80) |
+| Reliability | `0.82` (meta 0.8) |
 | Maintainability | `0.68` (meta 0.75) |
-| Security | `0.71` (meta 0.70) |
+| Security | `0.71` (meta 0.7) |
 
 O log indicará: `Sem configuração — usando dados mockados.`
 
@@ -192,4 +192,4 @@ docker compose down
 | `npm run compile` | Compila o código TypeScript da extensão |
 | `npm run watch` | Recompila automaticamente ao salvar arquivos |
 | `npm run lint` | Executa o ESLint |
-| `npm run test` | Executa os testes da extensão |
+| `npm run test:coverage` | Executa os testes com relatório de cobertura |
