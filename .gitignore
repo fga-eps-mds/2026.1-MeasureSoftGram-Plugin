@@ -34,3 +34,9 @@ lerna-debug.log*
 .DS_Store
 *.local
 *.vsix
+
+# SonarScanner
+.scannerwork/
+
+# Coverage reports
+coverage/
