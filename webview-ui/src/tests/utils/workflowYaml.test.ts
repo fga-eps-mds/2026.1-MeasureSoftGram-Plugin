@@ -26,9 +26,9 @@ describe('applySettingsToYaml', () => {
 
     it('deve substituir productName com aspas quando preenchido', () => {
         const result = applySettingsToYaml(DEFAULT_WORKFLOW_YAML, {
-            productName: 'meu-produto',
+            productName: 'Measure',
         });
-        expect(result).toContain('productName: "meu-produto"');
+        expect(result).toContain('productName: "Measure"');
     });
 
     it('deve substituir workflowName com aspas quando preenchido', () => {

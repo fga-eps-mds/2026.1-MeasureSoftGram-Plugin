@@ -27,13 +27,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 }) => {
   const score    = scoreData?.score ?? 0;
   const scorePct = (score * 100).toFixed(0);
-  const avgGoal  = scoreData
+  const avgGoal = scoreData?.characteristics.length
     ? scoreData.characteristics.reduce((s, c) => s + c.goal, 0) / scoreData.characteristics.length
     : 0.7;
 
-  const worstChar = scoreData?.characteristics.reduce((worst, c) =>
-    c.value - c.goal < worst.value - worst.goal ? c : worst,
-  );
+  const worstChar = scoreData?.characteristics.length
+    ? scoreData.characteristics.reduce((worst, c) =>
+        c.value - c.goal < worst.value - worst.goal ? c : worst,
+      )
+    : undefined;
 
   const productLabel = productName || 'sem produto configurado';
 

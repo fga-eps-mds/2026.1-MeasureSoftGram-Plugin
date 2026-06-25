@@ -1,4 +1,4 @@
-import { OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
+import { ExtensionContext, OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
 import { getNonce, getUri } from '../utilities/utilities';
 import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
 import * as fs from 'fs/promises';
@@ -6,15 +6,47 @@ import * as path from 'path';
 
 const WORKFLOW_REL_PATH = '.github/workflows/msgram.yml';
 
+const KEY_SERVICE_URL   = 'msgram.serviceUrl';
+const KEY_PRODUCT_NAME  = 'msgram.productName';
+const SECRET_TOKEN      = 'msgram.token';
+
 export class MeasureSoftGramSidebar implements WebviewViewProvider {
   public static readonly viewType = 'msgram.sidebarView';
   private _view?: WebviewView;
-  private _settings: MsgramSettings = { serviceUrl: '', token: '', productName: '' };
+  private _settings: MsgramSettings = {
+    serviceUrl: 'https://msgram-api.synaptha.com/',
+    token: '',
+    productName: 'measuresoftgram 2026',
+  };
   private readonly _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
   private _context: RepoContext | null = null;
   private _selectedRepo: RepoItem | null = null;
 
-  constructor(private readonly _extensionUri: Uri) {}
+  constructor(private readonly _extensionContext: ExtensionContext) {}
+
+  private get _extensionUri(): Uri {
+    return this._extensionContext.extensionUri;
+  }
+
+  private async _loadPersistedSettings(): Promise<void> {
+    const ctx = this._extensionContext;
+    const serviceUrl  = ctx.workspaceState.get<string>(KEY_SERVICE_URL,  'https://msgram-api.synaptha.com/');
+    const productName = ctx.workspaceState.get<string>(KEY_PRODUCT_NAME, 'measuresoftgram 2026');
+    const token       = (await ctx.secrets.get(SECRET_TOKEN)) ?? '';
+    this._settings = { serviceUrl, token, productName };
+  }
+
+  private async _persistSettings(data: { serviceUrl: string; msgramServiceToken: string; productName: string }): Promise<void> {
+    const ctx = this._extensionContext;
+    await ctx.workspaceState.update(KEY_SERVICE_URL,  data.serviceUrl);
+    await ctx.workspaceState.update(KEY_PRODUCT_NAME, data.productName);
+    await ctx.secrets.store(SECRET_TOKEN, data.msgramServiceToken);
+    this._settings = {
+      serviceUrl:  data.serviceUrl,
+      token:       data.msgramServiceToken,
+      productName: data.productName,
+    };
+  }
 
   public resolveWebviewView(webviewView: WebviewView) {
     this._view = webviewView;
@@ -154,6 +186,14 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     webview.onDidReceiveMessage(async (message: any) => {
       switch (message.command) {
         case 'request_score':
+          await this._loadPersistedSettings();
+          webview.postMessage({
+            command: 'settings_loaded',
+            data: {
+              serviceUrl:  this._settings.serviceUrl,
+              productName: this._settings.productName,
+            },
+          });
           await this._loadReposAndScore();
           break;
 
@@ -168,7 +208,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
         }
 
         case 'save_settings':
-          this._settings = message.data as MsgramSettings;
+          await this._persistSettings(message.data);
           this._context = null;
           this._selectedRepo = null;
           webview.postMessage({ command: 'settings_saved' });

@@ -6,7 +6,7 @@ describe('getMissingSettings', () => {
         const settings = {
             githubToken: 'token123',
             msgramServiceToken: 'msgram123',
-            productName: 'meu-produto',
+            productName: 'Measure',
             workflowName: 'Build',
         };
         expect(getMissingSettings(settings)).toHaveLength(0);
@@ -19,7 +19,7 @@ describe('getMissingSettings', () => {
     it('deve retornar o campo faltante quando apenas um está ausente', () => {
         const settings = {
             msgramServiceToken: 'msgram123',
-            productName: 'meu-produto',
+            productName: 'Measure',
             workflowName: 'Build',
         };
         const missing = getMissingSettings(settings);
@@ -32,7 +32,7 @@ describe('getMissingSettings', () => {
         const settings = {
             githubToken: '   ',
             msgramServiceToken: 'msgram123',
-            productName: 'meu-produto',
+            productName: 'Measure',
             workflowName: 'Build',
         };
         const missing = getMissingSettings(settings);
