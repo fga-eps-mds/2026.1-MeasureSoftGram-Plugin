@@ -2,16 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar }       from './components/Sidebar';
 import { Tabs }          from './components/Tabs';
 import { DashboardView } from './components/DashboardView';
-import { OutputView }    from './components/action/OutputView.tsx';
 import { SettingsView }  from './components/SettingsView';
 import { ActionView }    from './components/action/ActionView.tsx';
 import { getVSCodeAPI }  from './utils/vscode';
 import { now }           from './utils/helpers';
 
+import { DEFAULT_WORKFLOW_YAML } from './utils/defaultWorkflow';
+import { applySettingsToYaml }   from './utils/workflowYaml';
+import { getMissingSettings }    from './utils/validation';
+
 import type {
   TabName,
   ScoreData,
-  LogLine,
   SettingsData,
   ExtensionMessage,
 } from './types/index';
@@ -30,28 +32,24 @@ const App: React.FC = () => {
 
   const [scoreData, setScoreData]       = useState<ScoreData | null>(null);
   const [scoreLoading, setScoreLoading] = useState(false);
+  const [scoreError, setScoreError]     = useState<string | null>(null);
   const [notifText, setNotifText]       = useState('Análise concluída. 2 de 3 características dentro da meta da release.');
   const [notifType, setNotifType]       = useState<'ok' | 'error'>('ok');
 
   const [isRunning, setIsRunning]           = useState(false);
   const [showCommitWarn, setShowCommitWarn] = useState(true);
-  const [logLines, setLogLines]             = useState<LogLine[]>([
-    { time: '09:14:01', text: '[MSGRAM] Executando pipeline action...', isError: false },
-    { time: '09:14:08', text: '✓ Pipeline concluído com sucesso.',      isError: false },
-    { time: '09:14:08', text: '[MSGRAM] Análise concluída. Veja o painel para detalhes.', isError: false },
-  ]);
-
-  const appendLog = useCallback((text: string, isError: boolean) => {
-    setLogLines(prev => [...prev, { time: now(), text, isError }]);
-  }, []);
 
   const [isPublishing, setIsPublishing]   = useState(false);
   const [publishStatus, setPublishStatus] = useState('');
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
 
-  const [yaml, setYaml]                         = useState('');
+  const [settings, setSettings] = useState<Partial<SettingsData>>({});
+
+  const [yaml, setYaml]                             = useState(DEFAULT_WORKFLOW_YAML);
   const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
+
+  const [actionAlert, setActionAlert] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (event: MessageEvent<ExtensionMessage>) => {
@@ -60,38 +58,29 @@ const App: React.FC = () => {
 
         case 'score_loading':
           setScoreLoading(true);
+          setScoreError(null);
           break;
 
         case 'score_loaded':
           setScoreLoading(false);
+          setScoreError(null);
           setScoreData(msg.data);
           break;
 
         case 'score_error':
           setScoreLoading(false);
+          setScoreError(msg.message);
           setNotifText(msg.message);
           setNotifType('error');
           break;
 
         case 'analysis_started':
           setIsRunning(true);
-          setLogLines([]);
-          showTab('output');
-          break;
-
-        case 'output_line':
-          appendLog(msg.line, msg.isError);
           break;
 
         case 'analysis_done':
           setIsRunning(false);
           setShowCommitWarn(false);
-          appendLog(
-              msg.success
-                  ? 'act concluído com sucesso.'
-                  : `act encerrou com código ${msg.exitCode}.`,
-              !msg.success,
-          );
           if (msg.success) {
             setTimeout(() => showTab('dashboard'), 600);
           }
@@ -99,7 +88,6 @@ const App: React.FC = () => {
 
         case 'analysis_stopped':
           setIsRunning(false);
-          appendLog('Execução interrompida pelo usuário.', true);
           break;
 
         case 'yaml_loaded':
@@ -120,12 +108,18 @@ const App: React.FC = () => {
           setSettingsSavedFeedback(true);
           setTimeout(() => setSettingsSavedFeedback(false), 3000);
           break;
+
+          // Disparado pela extensão ao abrir o painel, com as settings
+          // já salvas anteriormente (tokens não vêm em texto puro, só os demais campos)
+        case 'settings_loaded':
+          setSettings(msg.data);
+          break;
       }
     };
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [showTab, appendLog]);
+  }, [showTab]);
 
   const handleRunAnalysis  = () => vscode.postMessage({ command: 'run_analysis' });
   const handleStopAnalysis = () => vscode.postMessage({ command: 'stop_analysis' });
@@ -136,15 +130,33 @@ const App: React.FC = () => {
   };
 
   const handleSaveSettings = (data: SettingsData) => {
+    setSettings(data);
     vscode.postMessage({ command: 'save_settings', data });
   };
 
   const handleSaveAction = () => {
-    vscode.postMessage({ command: 'save_action', yaml });
+    const mergedYaml = applySettingsToYaml(yaml, settings);
+    setYaml(mergedYaml);
+    vscode.postMessage({ command: 'save_action', yaml: mergedYaml });
   };
 
   const handleRunAction = () => {
-    vscode.postMessage({ command: 'run_action' });
+    const missing = getMissingSettings(settings);
+
+    if (missing.length > 0) {
+      const message =
+          `Preencha os campos obrigatórios em Settings antes de rodar a pipeline: ` +
+          missing.map((m) => m.label).join(', ');
+
+      setActionAlert(message);
+      vscode.postMessage({ command: 'show_warning', message });
+      return; // bloqueia a execução
+    }
+
+    setActionAlert(null);
+    const mergedYaml = applySettingsToYaml(yaml, settings);
+    setYaml(mergedYaml);
+    vscode.postMessage({ command: 'run_action', yaml: mergedYaml });
   };
 
   return (
@@ -167,6 +179,8 @@ const App: React.FC = () => {
           {activeTab === 'dashboard' && (
               <DashboardView
                   scoreData={scoreData}
+                  scoreLoading={scoreLoading}
+                  scoreError={scoreError}
                   showCommitWarn={showCommitWarn}
                   notifText={notifText}
                   notifType={notifType}
@@ -176,12 +190,9 @@ const App: React.FC = () => {
               />
           )}
 
-          {activeTab === 'output' && (
-              <OutputView lines={logLines} />
-          )}
-
           {activeTab === 'settings' && (
               <SettingsView
+                  initialData={settings}
                   onSave={handleSaveSettings}
                   savedFeedback={settingsSavedFeedback}
               />
@@ -195,6 +206,7 @@ const App: React.FC = () => {
                   savedFeedback={actionSavedFeedback}
                   onRun={handleRunAction}
                   running={isRunning}
+                  alert={actionAlert}
               />
           )}
 

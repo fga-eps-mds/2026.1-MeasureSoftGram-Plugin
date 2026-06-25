@@ -40,7 +40,11 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "test:webview-run": "cd webview-ui && npm run test:run",
+    "test:webview-watch": "cd webview-ui && npm run test:watch",
+    "test:webview-coverage": "cd webview-ui && npm run test:coverage",
+    "test:all": "npm run test:webview && npm test"
   },
   "devDependencies": {
     "@types/vscode": "^1.120.0",
