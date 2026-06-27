@@ -1,7 +1,10 @@
-import {Uri, Webview} from "vscode";
-
-export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) {
-    return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
+export function getUri(
+    webview: { asWebviewUri: (uri: any) => any },
+    extensionUri: any,
+    pathList: string[],
+    joinPath: (base: any, ...paths: string[]) => any = require('vscode').Uri.joinPath
+) {
+    return webview.asWebviewUri(joinPath(extensionUri, ...pathList));
 }
 
 export function getNonce() {
