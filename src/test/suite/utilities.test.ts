@@ -17,6 +17,32 @@ suite('utilities', () => {
         });
     });
 
+    suite("getUri()", () => {
+        test("retorna a URI convertida pelo webview", () => {
+            const joinedUri = { scheme: "fake" } as any;
+            const webviewUri = { scheme: "webview" } as any;
 
+            const webview = {
+                asWebviewUri(uri: unknown) {
+                    assert.strictEqual(uri, joinedUri);
+                    return webviewUri;
+                },
+            };
+
+            const joinPath = (_base: any, ...paths: string[]) => {
+                assert.deepStrictEqual(paths, ["media", "main.js"]);
+                return joinedUri;
+            };
+
+            const result = getUri(
+                webview as any,
+                {} as any,
+                ["media", "main.js"],
+                joinPath
+            );
+
+            assert.strictEqual(result, webviewUri);
+        });
+    });
 
 });
