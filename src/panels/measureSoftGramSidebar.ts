@@ -1,6 +1,15 @@
-import { ExtensionContext, OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
-import { MeasureSoftGramBase } from './measureSoftGramBase';
-import { MsgramStatusBar } from '../statusbar/msgramStatusBar';
+import {
+  ExtensionContext,
+  OutputChannel,
+  Uri,
+  Webview,
+  WebviewView,
+  WebviewViewProvider,
+  window,
+  workspace
+} from 'vscode';
+import {MeasureSoftGramBase} from './measureSoftGramBase';
+import {MsgramStatusBar} from '../statusbar/msgramStatusBar';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -20,6 +29,25 @@ export class MeasureSoftGramSidebar extends MeasureSoftGramBase implements Webvi
 
   protected get _webview(): Webview | undefined {
     return this._view?.webview;
+  }
+
+  public resolveWebviewView(webviewView: WebviewView) {
+    this._view = webviewView;
+
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [
+        Uri.joinPath(this._extensionContext.extensionUri, 'out'),
+        Uri.joinPath(this._extensionContext.extensionUri, 'webview-ui/build'),
+      ],
+    };
+
+    webviewView.webview.html = this._getWebviewContent(
+        webviewView.webview,
+        this._extensionContext.extensionUri,
+    );
+
+    this._setWebviewMessageListener(webviewView.webview);
   }
 
   protected logger() {
@@ -47,25 +75,6 @@ export class MeasureSoftGramSidebar extends MeasureSoftGramBase implements Webvi
     this._statusBar.setError();
   }
 
-  public resolveWebviewView(webviewView: WebviewView) {
-    this._view = webviewView;
-
-    webviewView.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [
-        Uri.joinPath(this._extensionContext.extensionUri, 'out'),
-        Uri.joinPath(this._extensionContext.extensionUri, 'webview-ui/build'),
-      ],
-    };
-
-    webviewView.webview.html = this._getWebviewContent(
-        webviewView.webview,
-        this._extensionContext.extensionUri,
-    );
-
-    this._setWebviewMessageListener(webviewView.webview);
-  }
-
   private async _saveWorkflowFile(yaml: string): Promise<string> {
     const folder = workspace.workspaceFolders?.[0];
     if (!folder) {
@@ -75,7 +84,7 @@ export class MeasureSoftGramSidebar extends MeasureSoftGramBase implements Webvi
     const workspacePath = folder.uri.fsPath;
     const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
 
-    await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+    await fs.mkdir(path.dirname(workflowAbsPath), {recursive: true});
     await fs.writeFile(workflowAbsPath, yaml, 'utf-8');
 
     return workspacePath;
@@ -111,7 +120,7 @@ export class MeasureSoftGramSidebar extends MeasureSoftGramBase implements Webvi
       if (message.command === 'save_action') {
         try {
           await this._saveWorkflowFile(message.yaml);
-          webview.postMessage({ command: 'action_saved' });
+          webview.postMessage({command: 'action_saved'});
         } catch (err) {
           window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
         }

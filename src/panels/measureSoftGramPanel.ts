@@ -1,5 +1,5 @@
-import { Disposable, ExtensionContext, Uri, ViewColumn, Webview, WebviewPanel, window, workspace } from 'vscode';
-import { MeasureSoftGramBase } from './measureSoftGramBase';
+import {Disposable, ExtensionContext, Uri, ViewColumn, Webview, WebviewPanel, window, workspace} from 'vscode';
+import {MeasureSoftGramBase} from './measureSoftGramBase';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -51,7 +51,9 @@ export class MeasureSoftGramPanel extends MeasureSoftGramBase {
     this._panel.dispose();
     while (this._disposables.length) {
       const disposable = this._disposables.pop();
-      if (disposable) { disposable.dispose(); }
+      if (disposable) {
+        disposable.dispose();
+      }
     }
   }
 
@@ -64,7 +66,7 @@ export class MeasureSoftGramPanel extends MeasureSoftGramBase {
     const workspacePath = folder.uri.fsPath;
     const workflowAbsPath = path.join(workspacePath, WORKFLOW_REL_PATH);
 
-    await fs.mkdir(path.dirname(workflowAbsPath), { recursive: true });
+    await fs.mkdir(path.dirname(workflowAbsPath), {recursive: true});
     await fs.writeFile(workflowAbsPath, yaml, 'utf-8');
 
     return workspacePath;
@@ -97,13 +99,15 @@ export class MeasureSoftGramPanel extends MeasureSoftGramBase {
   private _setWebviewMessageListener(webview: Webview) {
     webview.onDidReceiveMessage(async (message: any) => {
       const handled = await this._handleCommonMessage(message);
-      if (handled) { return; }
+      if (handled) {
+        return;
+      }
 
       switch (message.command) {
         case 'save_action': {
           try {
             await this._saveWorkflowFile(message.yaml);
-            webview.postMessage({ command: 'action_saved' });
+            webview.postMessage({command: 'action_saved'});
           } catch (err) {
             window.showErrorMessage(`Não foi possível salvar o workflow: ${err}`);
           }

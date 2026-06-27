@@ -18,7 +18,7 @@ export function activate(
     const sidebar = new Sidebar(context, statusBar);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(Sidebar.viewType, sidebar, {
-            webviewOptions: { retainContextWhenHidden: true },
+            webviewOptions: {retainContextWhenHidden: true},
         })
     );
 }

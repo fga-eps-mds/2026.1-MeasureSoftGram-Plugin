@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { MsgramStatusBar, StatusBarDeps } from '../../statusbar/msgramStatusBar';
+import {MsgramStatusBar, StatusBarDeps} from '../../statusbar/msgramStatusBar';
 
 function makeFakeItem() {
     return {
@@ -10,15 +10,22 @@ function makeFakeItem() {
         backgroundColor: undefined as any,
         showCalled: false,
         disposeCalled: false,
-        show() { this.showCalled = true; },
-        dispose() { this.disposeCalled = true; },
+        show() {
+            this.showCalled = true;
+        },
+        dispose() {
+            this.disposeCalled = true;
+        },
     };
 }
 
 function makeDeps(item: ReturnType<typeof makeFakeItem>): StatusBarDeps {
     return {
         createStatusBarItem: () => item as any,
-        ThemeColor: class { constructor(public id: string) {} } as any,
+        ThemeColor: class {
+            constructor(public id: string) {
+            }
+        } as any,
     };
 }
 

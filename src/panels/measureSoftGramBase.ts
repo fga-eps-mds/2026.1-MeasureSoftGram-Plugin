@@ -1,30 +1,38 @@
-import { ExtensionContext, Uri, Webview } from 'vscode';
-import { getNonce, getUri } from '../utilities/utilities';
-import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
+import {ExtensionContext, Uri, Webview} from 'vscode';
+import {getNonce, getUri} from '../utilities/utilities';
+import {fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem} from '../services/msgramApi';
 
-export const KEY_SERVICE_URL  = 'msgram.serviceUrl';
+export const KEY_SERVICE_URL = 'msgram.serviceUrl';
 export const KEY_PRODUCT_NAME = 'msgram.productName';
-export const SECRET_TOKEN     = 'msgram.token';
+export const SECRET_TOKEN = 'msgram.token';
 
 export const DEFAULT_SETTINGS: MsgramSettings = {
-    serviceUrl:  'https://msgram-api.synaptha.com/',
-    token:       '',
+    serviceUrl: 'https://msgram-api.synaptha.com/',
+    token: '',
     productName: 'measuresoftgram 2026',
 };
 
 export abstract class MeasureSoftGramBase {
-    protected _settings: MsgramSettings = { ...DEFAULT_SETTINGS };
+    protected _settings: MsgramSettings = {...DEFAULT_SETTINGS};
     protected _context: RepoContext | null = null;
     protected _selectedRepo: RepoItem | null = null;
 
-    constructor(protected readonly _extensionContext: ExtensionContext) {}
+    constructor(protected readonly _extensionContext: ExtensionContext) {
+    }
 
     protected abstract get _webview(): Webview | undefined;
 
-    protected onScoreLoaded(_data: any): void {}
-    protected onScoreError(): void {}
-    protected onReposEmpty(): void {}
-    protected onLoadStart(): void {}
+    protected onScoreLoaded(_data: any): void {
+    }
+
+    protected onScoreError(): void {
+    }
+
+    protected onReposEmpty(): void {
+    }
+
+    protected onLoadStart(): void {
+    }
 
     protected logger(): ((msg: string) => void) | undefined {
         return undefined;
@@ -33,39 +41,45 @@ export abstract class MeasureSoftGramBase {
 
     protected async _loadPersistedSettings(): Promise<void> {
         const ctx = this._extensionContext;
-        const serviceUrl  = ctx.workspaceState.get<string>(KEY_SERVICE_URL,  DEFAULT_SETTINGS.serviceUrl);
+        const serviceUrl = ctx.workspaceState.get<string>(KEY_SERVICE_URL, DEFAULT_SETTINGS.serviceUrl);
         const productName = ctx.workspaceState.get<string>(KEY_PRODUCT_NAME, DEFAULT_SETTINGS.productName);
-        const token       = (await ctx.secrets.get(SECRET_TOKEN)) ?? '';
-        this._settings = { serviceUrl, token, productName };
+        const token = (await ctx.secrets.get(SECRET_TOKEN)) ?? '';
+        this._settings = {serviceUrl, token, productName};
     }
 
-    protected async _persistSettings(data: { serviceUrl: string; msgramServiceToken: string; productName: string }): Promise<void> {
+    protected async _persistSettings(data: {
+        serviceUrl: string;
+        msgramServiceToken: string;
+        productName: string
+    }): Promise<void> {
         const ctx = this._extensionContext;
-        await ctx.workspaceState.update(KEY_SERVICE_URL,  data.serviceUrl);
+        await ctx.workspaceState.update(KEY_SERVICE_URL, data.serviceUrl);
         await ctx.workspaceState.update(KEY_PRODUCT_NAME, data.productName);
         await ctx.secrets.store(SECRET_TOKEN, data.msgramServiceToken);
         this._settings = {
-            serviceUrl:  data.serviceUrl,
-            token:       data.msgramServiceToken,
+            serviceUrl: data.serviceUrl,
+            token: data.msgramServiceToken,
             productName: data.productName,
         };
     }
 
     protected async _loadReposAndScore(): Promise<void> {
         const webview = this._webview;
-        if (!webview) { return; }
+        if (!webview) {
+            return;
+        }
 
         this.onLoadStart();
-        webview.postMessage({ command: 'score_loading' });
+        webview.postMessage({command: 'score_loading'});
 
         try {
             this._context = await fetchRepositories(this._settings, this.logger());
             const repos = this._context.repos;
-            webview.postMessage({ command: 'repos_loaded', repos });
+            webview.postMessage({command: 'repos_loaded', repos});
 
             if (!repos.length) {
                 this.onReposEmpty();
-                webview.postMessage({ command: 'score_error', message: 'Nenhum repositório encontrado.' });
+                webview.postMessage({command: 'score_error', message: 'Nenhum repositório encontrado.'});
                 return;
             }
 
@@ -75,16 +89,18 @@ export abstract class MeasureSoftGramBase {
             const msg = err.message ?? 'Erro ao buscar repositórios.';
             this.logger()?.(` [ERRO] ${msg}`);
             this.onScoreError();
-            webview.postMessage({ command: 'score_error', message: msg });
+            webview.postMessage({command: 'score_error', message: msg});
         }
     }
 
     protected async _loadScoreForSelected(): Promise<void> {
         const webview = this._webview;
-        if (!webview || !this._context || !this._selectedRepo) { return; }
+        if (!webview || !this._context || !this._selectedRepo) {
+            return;
+        }
 
         this.onLoadStart();
-        webview.postMessage({ command: 'score_loading' });
+        webview.postMessage({command: 'score_loading'});
 
         try {
             const data = await fetchScoreForRepo(
@@ -96,12 +112,12 @@ export abstract class MeasureSoftGramBase {
                 this.logger(),
             );
             this.onScoreLoaded(data);
-            webview.postMessage({ command: 'score_loaded', data });
+            webview.postMessage({command: 'score_loaded', data});
         } catch (err: any) {
             const msg = err.message ?? 'Erro ao buscar métricas.';
             this.logger()?.(`[ERRO] ${msg}`);
             this.onScoreError();
-            webview.postMessage({ command: 'score_error', message: msg });
+            webview.postMessage({command: 'score_error', message: msg});
         }
     }
 
@@ -130,7 +146,9 @@ export abstract class MeasureSoftGramBase {
 
     protected async _handleCommonMessage(message: any): Promise<boolean> {
         const webview = this._webview;
-        if (!webview) { return false; }
+        if (!webview) {
+            return false;
+        }
 
         switch (message.command) {
             case 'request_score':
@@ -138,7 +156,7 @@ export abstract class MeasureSoftGramBase {
                 webview.postMessage({
                     command: 'settings_loaded',
                     data: {
-                        serviceUrl:  this._settings.serviceUrl,
+                        serviceUrl: this._settings.serviceUrl,
                         productName: this._settings.productName,
                     },
                 });
@@ -146,7 +164,9 @@ export abstract class MeasureSoftGramBase {
                 return true;
 
             case 'select_repo': {
-                if (!this._context) { return true; }
+                if (!this._context) {
+                    return true;
+                }
                 const repo = this._context.repos.find((r: RepoItem) => r.id === message.repoPk);
                 if (repo) {
                     this._selectedRepo = repo;
@@ -159,7 +179,7 @@ export abstract class MeasureSoftGramBase {
                 await this._persistSettings(message.data);
                 this._context = null;
                 this._selectedRepo = null;
-                webview.postMessage({ command: 'settings_saved' });
+                webview.postMessage({command: 'settings_saved'});
                 await this._loadReposAndScore();
                 return true;
 

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { activate } from '../activator';
+import {activate} from '../activator';
 
 suite('activator — activate()', () => {
     const subscriptions: { dispose: () => void }[] = [];
@@ -10,28 +10,45 @@ suite('activator — activate()', () => {
     let sidebarReceivedStatusBar: unknown = null;
 
     suiteSetup(() => {
-        const fakeContext = { subscriptions };
+        const fakeContext = {subscriptions};
         const fakeVscode = {
             commands: {
                 registerCommand: (id: string, fn: () => void) => {
                     registeredCommands[id] = fn;
-                    return { dispose: () => {} };
+                    return {
+                        dispose: () => {
+                        }
+                    };
                 },
             },
             window: {
                 registerWebviewViewProvider: (id: string, provider: unknown) => {
                     registeredProviders[id] = provider;
-                    return { dispose: () => {} };
+                    return {
+                        dispose: () => {
+                        }
+                    };
                 },
             },
         };
-        const FakePanel = { render: () => { panelRenderCalled = true; } };
+        const FakePanel = {
+            render: () => {
+                panelRenderCalled = true;
+            }
+        };
+
         class FakeStatusBar {
-            dispose() { statusBarDisposeCalled = true; }
+            dispose() {
+                statusBarDisposeCalled = true;
+            }
         }
+
         class FakeSidebar {
             static viewType = 'msgram.sidebarView';
-            constructor(_ctx: unknown, sb: unknown) { sidebarReceivedStatusBar = sb; }
+
+            constructor(_ctx: unknown, sb: unknown) {
+                sidebarReceivedStatusBar = sb;
+            }
         }
 
         activate(fakeContext, fakeVscode, FakePanel, FakeSidebar, FakeStatusBar);

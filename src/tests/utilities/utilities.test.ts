@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { getUri, getNonce } from '../../utilities/utilities';
+import {getNonce, getUri} from '../../utilities/utilities';
 
 suite('utilities', () => {
 
@@ -19,8 +19,8 @@ suite('utilities', () => {
 
     suite("getUri()", () => {
         test("retorna a URI convertida pelo webview", () => {
-            const joinedUri = { scheme: "fake" } as any;
-            const webviewUri = { scheme: "webview" } as any;
+            const joinedUri = {scheme: "fake"} as any;
+            const webviewUri = {scheme: "webview"} as any;
 
             const webview = {
                 asWebviewUri(uri: unknown) {
