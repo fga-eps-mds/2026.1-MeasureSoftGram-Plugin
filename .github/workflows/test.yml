@@ -21,7 +21,7 @@ jobs:
       - name: Compilar extensão
         run: npm run compile
       - name: Rodar testes com cobertura
-        run: cd webview-ui && npm run test:coverage
+        run: cd webview-ui && npm run tests:coverage
       - name: Scanner do SonarCloud
         uses: SonarSource/sonarqube-scan-action@v6
         env:

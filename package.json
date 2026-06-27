@@ -12,25 +12,25 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-  "viewsContainers": {
-    "activitybar": [
-      {
-        "id": "msgram-sidebar",
-        "title": "MeasureSoftGram",
-        "icon": "assets/icon.svg"
-      }
-    ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "msgram-sidebar",
+          "title": "MeasureSoftGram",
+          "icon": "assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "msgram-sidebar": [
+        {
+          "type": "webview",
+          "id": "msgram.sidebarView",
+          "name": "Measure"
+        }
+      ]
+    }
   },
-  "views": {
-    "msgram-sidebar": [
-      {
-        "type": "webview",
-        "id": "msgram.sidebarView",
-        "name": "Measure"
-      }
-    ]
-  }
-},
   "scripts": {
     "install:all": "npm install && cd webview-ui && npm install",
     "start:webview": "cd webview-ui && npm run start",
@@ -39,10 +39,10 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
+    "lint": "eslint src" ,
     "test": "vscode-test",
-    "test:unit": "npm run compile && mocha --ui tdd --timeout 10000 'out/test/suite/**/*.test.js'",
-    "test:coverage": "npm run compile && c8 --reporter=lcov --reporter=text mocha --ui tdd --timeout 10000 'out/test/suite/**/*.test.js'",
+    "test:unit": "npm run compile && mocha --ui tdd --timeout 10000 'out/tests/**/*.test.js'",
+    "test:coverage": "npm run compile && c8 --reporter=lcov --reporter=text mocha --ui tdd --timeout 10000 'out/tests/**/*.test.js'",
     "test:webview-run": "cd webview-ui && npm run test:run",
     "test:webview-watch": "cd webview-ui && npm run test:watch",
     "test:webview-coverage": "cd webview-ui && npm run test:coverage",

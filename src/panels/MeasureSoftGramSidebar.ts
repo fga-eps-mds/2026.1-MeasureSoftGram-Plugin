@@ -1,7 +1,7 @@
 import { ExtensionContext, OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
 import { getNonce, getUri } from '../utilities/utilities';
 import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
-import { MsgramStatusBar } from '../statusbar/MsgramStatusBar';
+import { MsgramStatusBar } from '../statusbar/msgramStatusBar';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

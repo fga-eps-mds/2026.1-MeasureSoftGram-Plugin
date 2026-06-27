@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { activate } from '../../activator';
+import { activate } from '../activator';
 
 suite('activator — activate()', () => {
     const subscriptions: { dispose: () => void }[] = [];
