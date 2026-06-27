@@ -6,6 +6,8 @@ suite('activator — activate()', () => {
     const registeredCommands: Record<string, () => void> = {};
     const registeredProviders: Record<string, unknown> = {};
     let panelRenderCalled = false;
+    let statusBarDisposeCalled = false;
+    let sidebarReceivedStatusBar: unknown = null;
 
     suiteSetup(() => {
         const fakeContext = { subscriptions };
@@ -24,9 +26,15 @@ suite('activator — activate()', () => {
             },
         };
         const FakePanel = { render: () => { panelRenderCalled = true; } };
-        class FakeSidebar { static viewType = 'msgram.sidebarView'; constructor(_ctx: unknown) {} }
+        class FakeStatusBar {
+            dispose() { statusBarDisposeCalled = true; }
+        }
+        class FakeSidebar {
+            static viewType = 'msgram.sidebarView';
+            constructor(_ctx: unknown, sb: unknown) { sidebarReceivedStatusBar = sb; }
+        }
 
-        activate(fakeContext, fakeVscode, FakePanel, FakeSidebar);
+        activate(fakeContext, fakeVscode, FakePanel, FakeSidebar, FakeStatusBar);
     });
 
     test('registra o comando msgram.run', () => {
@@ -42,7 +50,15 @@ suite('activator — activate()', () => {
         assert.ok('msgram.sidebarView' in registeredProviders);
     });
 
-    test('adiciona 2 itens às subscriptions', () => {
-        assert.strictEqual(subscriptions.length, 2);
+    test('instancia StatusBar e adiciona às subscriptions', () => {
+        assert.ok(subscriptions.some(s => s instanceof Object && 'dispose' in s));
+    });
+
+    test('passa StatusBar para o Sidebar', () => {
+        assert.ok(sidebarReceivedStatusBar !== null);
+    });
+
+    test('adiciona 3 itens às subscriptions', () => {
+        assert.strictEqual(subscriptions.length, 3);
     });
 });
