@@ -19,19 +19,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ getValue }) => {
     };
 
     return (
-        <button ref={btnRef} className="btn sec" onClick={handleCopy} style={{
-            width: '100%',
-            fontFamily: 'Roboto, sans-serif',
-            fontSize: 16,
-            fontWeight: 700,
-            color: '#F4F5F6',
-            textAlign: 'center',
-            justifyContent: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            background: '#5f7ea3'
-        }}>
+        <button ref={btnRef} className="btn" onClick={handleCopy} style={{ width: '100%', justifyContent: 'center' }}>
             <i className="ti ti-copy" /> Copiar
         </button>
     );

@@ -47,8 +47,6 @@ const App: React.FC = () => {
     setLogLines(prev => [...prev, { time: now(), text, isError }]);
   }, []);
 
-  const [isPublishing, setIsPublishing]   = useState(false);
-  const [publishStatus, setPublishStatus] = useState('');
 
   const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
   const [settings, setSettings] = useState<Partial<SettingsData>>({});
@@ -126,11 +124,6 @@ const App: React.FC = () => {
           setTimeout(() => setActionSavedFeedback(false), 3000);
           break;
 
-        case 'published':
-          setIsPublishing(false);
-          setPublishStatus(`✓ Publicado em ${msg.release} às ${now()}`);
-          break;
-
         case 'settings_saved':
           setSettingsSavedFeedback(true);
           setTimeout(() => setSettingsSavedFeedback(false), 3000);
@@ -149,14 +142,6 @@ const App: React.FC = () => {
   const handleSelectRepo = (repoPk: number) => {
     setSelectedRepoPk(repoPk);
     vscode.postMessage({ command: 'select_repo', repoPk });
-  };
-
-  const handleRunAnalysis  = () => vscode.postMessage({ command: 'run_analysis' });
-  const handleStopAnalysis = () => vscode.postMessage({ command: 'stop_analysis' });
-
-  const handlePublish = () => {
-    setIsPublishing(true);
-    vscode.postMessage({ command: 'publish' });
   };
 
   const handleSaveSettings = (data: SettingsData) => {
@@ -191,13 +176,10 @@ const App: React.FC = () => {
       <Sidebar
         scoreData={scoreData}
         scoreLoading={scoreLoading}
+        scoreError={!scoreLoading && scoreData === null && notifType === 'error'}
         repos={repos}
         selectedRepoPk={selectedRepoPk}
         onSelectRepo={handleSelectRepo}
-        onRunAnalysis={handleRunAnalysis}
-        onStopAnalysis={handleStopAnalysis}
-        onShowSettings={() => showTab('settings')}
-        isRunning={isRunning}
         activeTab={activeTab}
         onShowTab={showTab}
       />
@@ -214,9 +196,6 @@ const App: React.FC = () => {
             showCommitWarn={showCommitWarn}
             notifText={notifText}
             notifType={notifType}
-            publishStatus={publishStatus}
-            isPublishing={isPublishing}
-            onPublish={handlePublish}
           />
         )}
 
