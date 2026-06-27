@@ -1,6 +1,7 @@
 import { ExtensionContext, OutputChannel, Uri, Webview, WebviewView, WebviewViewProvider, window, workspace } from 'vscode';
 import { getNonce, getUri } from '../utilities/utilities';
 import { fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem } from '../services/msgramApi';
+import { MsgramStatusBar } from '../statusbar/MsgramStatusBar';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -21,8 +22,11 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
   private readonly _log: OutputChannel = window.createOutputChannel('MeasureSoftGram API');
   private _context: RepoContext | null = null;
   private _selectedRepo: RepoItem | null = null;
+  private readonly _statusBar: MsgramStatusBar;
 
-  constructor(private readonly _extensionContext: ExtensionContext) {}
+  constructor(private readonly _extensionContext: ExtensionContext, statusBar: MsgramStatusBar) {
+    this._statusBar = statusBar;
+  }
 
   private get _extensionUri(): Uri {
     return this._extensionContext.extensionUri;
@@ -76,6 +80,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     const webview = this._view.webview;
 
     this._log.show(true);
+    this._statusBar.setLoading();
     webview.postMessage({ command: 'score_loading' });
 
     try {
@@ -85,6 +90,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
       webview.postMessage({ command: 'repos_loaded', repos });
 
       if (!repos.length) {
+        this._statusBar.setError();
         webview.postMessage({ command: 'score_error', message: 'Nenhum repositório encontrado.' });
         return;
       }
@@ -94,6 +100,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     } catch (err: any) {
       const msg = err.message ?? 'Erro ao buscar repositórios.';
       this._log.appendLine(`[ERRO] ${msg}`);
+      this._statusBar.setError();
       webview.postMessage({ command: 'score_error', message: msg });
     }
   }
@@ -102,6 +109,7 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
     if (!this._view || !this._context || !this._selectedRepo) { return; }
     const webview = this._view.webview;
 
+    this._statusBar.setLoading();
     webview.postMessage({ command: 'score_loading' });
     try {
       const data = await fetchScoreForRepo(
@@ -112,10 +120,16 @@ export class MeasureSoftGramSidebar implements WebviewViewProvider {
         this._selectedRepo.name,
         this.logger(),
       );
+      if (data.noData) {
+        this._statusBar.setNoData();
+      } else {
+        this._statusBar.setScore(data.score);
+      }
       webview.postMessage({ command: 'score_loaded', data });
     } catch (err: any) {
       const msg = err.message ?? 'Erro ao buscar métricas.';
       this._log.appendLine(`[ERRO] ${msg}`);
+      this._statusBar.setError();
       webview.postMessage({ command: 'score_error', message: msg });
     }
   }
