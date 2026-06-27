@@ -29,6 +29,28 @@
           "name": "Measure"
         }
       ]
+    },
+    "commands": [
+      {
+        "command": "msgram.run",
+        "title": "Abrir MeasureSoftGram (Panel)",
+        "icon": "$(graph)",
+        "category": "MeasureSoftGram"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "msgram.run"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "msgram.run",
+          "when": "view == msgram.sidebarView",
+          "group": "navigation"
+        }
+      ]
     }
   },
   "scripts": {
@@ -39,7 +61,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src" ,
+    "lint": "eslint src",
     "test": "vscode-test",
     "test:unit": "npm run compile && mocha --ui tdd --timeout 10000 'out/tests/**/*.test.js'",
     "test:coverage": "npm run compile && c8 --reporter=lcov --reporter=text mocha --ui tdd --timeout 10000 'out/tests/**/*.test.js'",
