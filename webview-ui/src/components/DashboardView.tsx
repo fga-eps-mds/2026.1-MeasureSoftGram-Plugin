@@ -9,9 +9,6 @@ interface DashboardViewProps {
   showCommitWarn: boolean;
   notifText: string;
   notifType: 'ok' | 'error';
-  publishStatus: string;
-  isPublishing: boolean;
-  onPublish: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -21,9 +18,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   showCommitWarn,
   notifText,
   notifType,
-  publishStatus,
-  isPublishing,
-  onPublish,
 }) => {
   const score    = scoreData?.score ?? 0;
   const scorePct = (score * 100).toFixed(0);
@@ -52,14 +46,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="view-header">
         <div>
           <div className="view-title">
-            <i className="ti ti-chart-radar" style={{ color: '#0e639c', fontSize: 16 }} />
+            <i className="ti ti-chart-radar" style={{ color: '#2B4D6F', fontSize: 16 }} />
             MeasureSoftGram
           </div>
           <div className="view-sub">
             {productLabel} · última análise: agora mesmo
           </div>
         </div>
-        <span className="rbadge">R2025.1</span>
       </div>
 
       {/* Loading state */}
@@ -73,7 +66,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* No data warning */}
       {!scoreLoading && scoreData?.noData && (
         <div className="notif warn-n" id="notif-no-data">
-          <i className="ti ti-alert-circle" style={{ color: '#cca700' }} />
+          <i className="ti ti-alert-circle" style={{ color: '#DF8E16' }} />
           <span>
             Este repositório ainda não possui métricas calculadas no MeasureSoftGram.
             Execute uma análise completa para gerar os dados.
@@ -88,9 +81,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <i className="ti ti-git-commit" /> Atenção antes do commit
           </div>
           <div className="cw-desc">
-            Você ainda não rodou a análise MSGRAM nesta sessão. Commitar sem analisar pode
+            Verfique se rodou a análise MSGRAM nesta sessão. Commitar sem analisar pode
             introduzir regressão em{' '}
-            <strong style={{ color: '#cca700' }}>{worstChar.name}</strong> — última nota{' '}
+            <strong style={{ color: '#DF8E16' }}>{worstChar.name}</strong> — última nota{' '}
             {worstChar.value.toFixed(2)}, próxima da meta {worstChar.goal.toFixed(2)}.
           </div>
         </div>
@@ -101,7 +94,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className={`notif${notifType === 'error' ? ' warn-n' : ''}`} id="notif-ok">
           <i
             className={`ti ${notifType === 'error' ? 'ti-alert-circle' : 'ti-circle-check'}`}
-            style={notifType === 'error' ? { color: '#f14c4c' } : undefined}
+            style={notifType === 'error' ? { color: '#D13310' } : undefined}
           />
           <span>{notifText}</span>
         </div>
@@ -114,7 +107,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {scoreData ? score.toFixed(2) : '—'}
           </div>
           <div className="hero-right">
-            <div className="hero-lbl">Nota geral do produto — R2025.1</div>
+            <div className="hero-lbl">Nota geral do produto</div>
             <div className="hero-bar">
               <div
                 className="hero-fill"
@@ -138,7 +131,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div
               key={c.name}
               className="char-row"
-              style={status === 'warn' ? { borderColor: '#cca70044' } : undefined}
+              style={status === 'warn' ? { borderColor: '#DF8E1633' } : undefined}
             >
               <i className={`ti ti-chart-dots char-icon ${status}`} />
               <span className="char-name">{c.name}</span>
@@ -151,23 +144,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         })}
       </div>
 
-      <div className="pubrow">
-        <button
-          className="btn suc"
-          id="btn-publish"
-          onClick={onPublish}
-          disabled={isPublishing}
-        >
-          {isPublishing ? (
-            <><i className="ti ti-loader run-anim" /> Enviando...</>
-          ) : (
-            <><i className="ti ti-upload" /> Publicar no MSGRAM</>
-          )}
-        </button>
-        <span className="pubst" id="publish-status">
-          {publishStatus || 'Resultado ainda não publicado nesta sessão.'}
-        </span>
-      </div>
     </div>
   );
 };
