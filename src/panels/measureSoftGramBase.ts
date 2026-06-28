@@ -1,6 +1,15 @@
 import {ExtensionContext, Uri, Webview} from 'vscode';
 import {getNonce, getUri} from '../utilities/utilities';
-import {fetchRepositories, fetchScoreForRepo, MsgramSettings, RepoContext, RepoItem} from '../services/msgramApi';
+import {
+    fetchRepositories as defaultFetchRepositories,
+    fetchScoreForRepo as defaultFetchScoreForRepo,
+    MsgramSettings,
+    RepoContext,
+    RepoItem,
+} from '../services/msgramApi';
+
+export type FetchRepositoriesFn = typeof defaultFetchRepositories;
+export type FetchScoreForRepoFn = typeof defaultFetchScoreForRepo;
 
 export const KEY_SERVICE_URL = 'msgram.serviceUrl';
 export const KEY_PRODUCT_NAME = 'msgram.productName';
@@ -38,7 +47,6 @@ export abstract class MeasureSoftGramBase {
         return undefined;
     }
 
-
     protected async _loadPersistedSettings(): Promise<void> {
         const ctx = this._extensionContext;
         const serviceUrl = ctx.workspaceState.get<string>(KEY_SERVICE_URL, DEFAULT_SETTINGS.serviceUrl);
@@ -50,7 +58,7 @@ export abstract class MeasureSoftGramBase {
     protected async _persistSettings(data: {
         serviceUrl: string;
         msgramServiceToken: string;
-        productName: string
+        productName: string;
     }): Promise<void> {
         const ctx = this._extensionContext;
         await ctx.workspaceState.update(KEY_SERVICE_URL, data.serviceUrl);
@@ -63,7 +71,10 @@ export abstract class MeasureSoftGramBase {
         };
     }
 
-    protected async _loadReposAndScore(): Promise<void> {
+    protected async _loadReposAndScore(
+        fetchRepos: FetchRepositoriesFn = defaultFetchRepositories,
+        fetchScore: FetchScoreForRepoFn = defaultFetchScoreForRepo,
+    ): Promise<void> {
         const webview = this._webview;
         if (!webview) {
             return;
@@ -73,7 +84,7 @@ export abstract class MeasureSoftGramBase {
         webview.postMessage({command: 'score_loading'});
 
         try {
-            this._context = await fetchRepositories(this._settings, this.logger());
+            this._context = await fetchRepos(this._settings, this.logger());
             const repos = this._context.repos;
             webview.postMessage({command: 'repos_loaded', repos});
 
@@ -84,16 +95,18 @@ export abstract class MeasureSoftGramBase {
             }
 
             this._selectedRepo = repos[0];
-            await this._loadScoreForSelected();
+            await this._loadScoreForSelected(fetchScore);
         } catch (err: any) {
             const msg = err.message ?? 'Erro ao buscar repositórios.';
-            this.logger()?.(` [ERRO] ${msg}`);
+            this.logger()?.(`[ERRO] ${msg}`);
             this.onScoreError();
             webview.postMessage({command: 'score_error', message: msg});
         }
     }
 
-    protected async _loadScoreForSelected(): Promise<void> {
+    protected async _loadScoreForSelected(
+        fetchScore: FetchScoreForRepoFn = defaultFetchScoreForRepo,
+    ): Promise<void> {
         const webview = this._webview;
         if (!webview || !this._context || !this._selectedRepo) {
             return;
@@ -103,7 +116,7 @@ export abstract class MeasureSoftGramBase {
         webview.postMessage({command: 'score_loading'});
 
         try {
-            const data = await fetchScoreForRepo(
+            const data = await fetchScore(
                 this._settings,
                 this._context.orgPk,
                 this._context.productPk,
@@ -144,7 +157,11 @@ export abstract class MeasureSoftGramBase {
     `;
     }
 
-    protected async _handleCommonMessage(message: any): Promise<boolean> {
+    protected async _handleCommonMessage(
+        message: any,
+        fetchRepos: FetchRepositoriesFn = defaultFetchRepositories,
+        fetchScore: FetchScoreForRepoFn = defaultFetchScoreForRepo,
+    ): Promise<boolean> {
         const webview = this._webview;
         if (!webview) {
             return false;
@@ -160,7 +177,7 @@ export abstract class MeasureSoftGramBase {
                         productName: this._settings.productName,
                     },
                 });
-                await this._loadReposAndScore();
+                await this._loadReposAndScore(fetchRepos, fetchScore);
                 return true;
 
             case 'select_repo': {
@@ -170,7 +187,7 @@ export abstract class MeasureSoftGramBase {
                 const repo = this._context.repos.find((r: RepoItem) => r.id === message.repoPk);
                 if (repo) {
                     this._selectedRepo = repo;
-                    await this._loadScoreForSelected();
+                    await this._loadScoreForSelected(fetchScore);
                 }
                 return true;
             }
@@ -180,7 +197,7 @@ export abstract class MeasureSoftGramBase {
                 this._context = null;
                 this._selectedRepo = null;
                 webview.postMessage({command: 'settings_saved'});
-                await this._loadReposAndScore();
+                await this._loadReposAndScore(fetchRepos, fetchScore);
                 return true;
 
             default:
