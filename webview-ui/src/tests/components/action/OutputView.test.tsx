@@ -68,6 +68,43 @@ describe('OutputView', () => {
         expect(span).not.toHaveClass('lerr');
     });
 
+    it('deve chamar escHtml com o texto de cada linha', () => {
+        const lines = makeLines([{text: '<script>xss</script>'}]);
+        render(<OutputView lines={lines}/>);
+        expect(helpers.escHtml).toHaveBeenCalledWith('<script>xss</script>');
+    });
+
+    it('deve renderizar o conteúdo via dangerouslySetInnerHTML', () => {
+        const lines = makeLines([{text: 'texto simples'}]);
+        render(<OutputView lines={lines}/>);
+        const span = screen.getByText('texto simples');
+        expect(span.innerHTML).toBe('texto simples');
+    });
+
+    it('deve fazer scroll para o final ao receber novas linhas', () => {
+        const scrollSpy = vi.spyOn(HTMLElement.prototype, 'scrollTop', 'set');
+        const {rerender} = render(<OutputView lines={[]}/>);
+        rerender(<OutputView lines={makeLines([{text: 'nova linha'}])}/>);
+        expect(scrollSpy).toHaveBeenCalled();
+    });
+
+    it('deve ter os IDs corretos nos elementos raiz', () => {
+        render(<OutputView lines={[]}/>);
+        expect(document.getElementById('view-output')).toBeInTheDocument();
+        expect(document.getElementById('output-log')).toBeInTheDocument();
+    });
+
+    it('deve exibir o horário de todas as linhas', () => {
+        const lines = makeLines([
+            {time: '10:01'},
+            {time: '10:02'},
+            {time: '10:03'},
+        ]);
+        render(<OutputView lines={lines}/>);
+        expect(screen.getByText('10:01')).toBeInTheDocument();
+        expect(screen.getByText('10:02')).toBeInTheDocument();
+        expect(screen.getByText('10:03')).toBeInTheDocument();
+    });
 
     it('deve lidar com texto vazio em uma linha sem quebrar', () => {
         const lines = makeLines([{text: ''}]);
