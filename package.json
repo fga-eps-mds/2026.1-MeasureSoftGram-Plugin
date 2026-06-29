@@ -1,13 +1,44 @@
 {
-  "name": "msgram",
-  "displayName": "msgram",
-  "description": "",
+  "name": "measuresoftgram",
+  "displayName": "MeasureSoftGram",
+  "description": "Análise multidimensional da qualidade de software, direto no VS Code.",
   "version": "0.0.1",
+  "publisher": "publisher-id",
+  "license": "AGPL-3.0",
+  "homepage": "https://msgram.lappis.rocks/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fga-eps-mds/MeasureSoftGram-Plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/fga-eps-mds/MeasureSoftGram-Plugin/issues"
+  },
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.118.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "metrics",
+    "quality",
+    "software quality",
+    "iso 25010",
+    "measuresoftgram",
+    "msgram",
+    "maintainability",
+    "reliability",
+    "static analysis",
+    "sonarqube",
+    "release quality",
+    "lappis",
+    "unb"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
