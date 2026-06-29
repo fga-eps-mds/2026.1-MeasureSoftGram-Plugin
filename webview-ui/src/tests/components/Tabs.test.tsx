@@ -48,9 +48,28 @@ describe('Tabs', () => {
         });
     });
 
+    it.each(TabsTest)('deve chamar onSelect com "$id" ao clicar na aba "$id"', ({id, label}) => {
+        render(<Tabs active="dashboard" onSelect={onSelect}/>);
+        fireEvent.click(screen.getByText(new RegExp(label)));
+        expect(onSelect).toHaveBeenCalledTimes(1);
+        expect(onSelect).toHaveBeenCalledWith(id);
+    });
+
+    it('não deve chamar onSelect sem interação', () => {
+        render(<Tabs active="dashboard" onSelect={onSelect}/>);
+        expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('deve chamar onSelect uma vez por clique', () => {
+        render(<Tabs active="dashboard" onSelect={onSelect}/>);
+        fireEvent.click(screen.getByText(/Config/));
+        fireEvent.click(screen.getByText(/Action/));
+        expect(onSelect).toHaveBeenCalledTimes(2);
+    });
+
     it('deve renderizar o container com a classe "tabs"', () => {
         const {container} = render(<Tabs active="dashboard" onSelect={onSelect}/>);
         expect(container.firstChild).toHaveClass('tabs');
     });
-
+    
 });
