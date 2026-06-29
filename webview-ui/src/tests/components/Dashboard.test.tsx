@@ -106,4 +106,58 @@ describe('DashboardView', () => {
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
         });
     });
+
+    describe('score hero', () => {
+        it('deve exibir o score formatado com 2 casas decimais', () => {
+            render(<DashboardView {...defaultProps} />);
+            expect(screen.getByText('0.82')).toBeInTheDocument();
+        });
+
+        it('deve exibir "—" quando scoreData é null', () => {
+            render(<DashboardView {...defaultProps} scoreData={null} />);
+            expect(screen.getByText('—')).toBeInTheDocument();
+        });
+
+        it('deve exibir status "acima" quando score >= avgGoal', () => {
+            render(<DashboardView {...defaultProps} />);
+            expect(screen.getByText(/acima ✓/i)).toBeInTheDocument();
+        });
+
+        it('deve exibir status "abaixo" quando score < avgGoal', () => {
+            const lowScore = { ...mockScoreData, score: 0.50 };
+            render(<DashboardView {...defaultProps} scoreData={lowScore} />);
+            expect(screen.getByText(/abaixo ✗/i)).toBeInTheDocument();
+        });
+
+        it('deve exibir "—" como metaStatus quando scoreData é null', () => {
+            render(<DashboardView {...defaultProps} scoreData={null} />);
+            expect(screen.getByText('—')).toBeInTheDocument();
+        });
+    });
+
+    describe('lista de características', () => {
+        it('deve renderizar todas as características', () => {
+            render(<DashboardView {...defaultProps} />);
+            expect(screen.getByText('Maintainability')).toBeInTheDocument();
+            expect(screen.getByText('Reliability')).toBeInTheDocument();
+            expect(screen.getByText('Performance')).toBeInTheDocument();
+        });
+
+        it('deve exibir certo para características acima da meta', () => {
+            render(<DashboardView {...defaultProps} />);
+            const checks = screen.getAllByText(/meta.*✓/);
+            expect(checks).toHaveLength(2);
+        });
+
+        it('deve exibir errado para características abaixo da meta', () => {
+            render(<DashboardView {...defaultProps} />);
+            const tildes = screen.getAllByText(/meta.*~/);
+            expect(tildes).toHaveLength(1);
+        });
+
+        it('não deve renderizar características quando scoreData é null', () => {
+            render(<DashboardView {...defaultProps} scoreData={null} />);
+            expect(screen.queryByText('Maintainability')).not.toBeInTheDocument();
+        });
+    });
 });
