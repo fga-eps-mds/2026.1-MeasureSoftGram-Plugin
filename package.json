@@ -2,8 +2,8 @@
   "name": "measuresoftgram",
   "displayName": "MeasureSoftGram",
   "description": "Análise multidimensional da qualidade de software, direto no VS Code.",
-  "version": "0.0.1",
-  "publisher": "publisher-id",
+  "version": "0.0.2",
+  "publisher": "MeasureSoftGram",
   "license": "AGPL-3.0",
   "homepage": "https://msgram.lappis.rocks/",
   "repository": {
@@ -19,7 +19,7 @@
     "theme": "dark"
   },
   "engines": {
-    "vscode": "^1.118.0"
+    "vscode": "^1.120.0"
   },
   "categories": [
     "Other",
