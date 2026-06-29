@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 const {mockPostMessage, mockGetState, mockSetState, mockGetMissingSettings} = vi.hoisted(() => {
@@ -106,6 +106,10 @@ vi.mock('../utils/validation', () => ({
 
 const {default: App} = await import('../App');
 
+function sendMessage(data: unknown) {
+    window.dispatchEvent(new MessageEvent('message', {data}));
+}
+
 describe('App', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -161,6 +165,118 @@ describe('App', () => {
             fireEvent.click(screen.getByTestId('tab-settings'));
             fireEvent.click(screen.getByTestId('tab-dashboard'));
             expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+    });
+
+    describe('mensagens da extensão', () => {
+        it('deve carregar repos ao receber repos_loaded', () => {
+            render(<App/>);
+            act(() => {
+                sendMessage({command: 'repos_loaded', repos: [{id: 1, name: 'repo-1'}, {id: 2, name: 'repo-2'}]});
+            });
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+
+        it('deve ativar scoreLoading ao receber score_loading', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'score_loading'}));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+
+        it('deve atualizar scoreData ao receber score_loaded', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'score_loaded', data: {score: 90, characteristics: []}}));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+
+        it('deve lidar com score_error sem quebrar', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'score_error', message: 'Falha na conexão'}));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+
+        it('deve navegar para output e limpar logs ao receber analysis_started', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'analysis_started'}));
+            expect(screen.getByTestId('output-view')).toBeInTheDocument();
+            expect(screen.getByTestId('output-view').getAttribute('data-lines')).toBe('0');
+        });
+
+        it('deve acumular linhas de log ao receber output_line', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'analysis_started'}));
+            act(() => sendMessage({command: 'output_line', line: 'linha 1', isError: false}));
+            act(() => sendMessage({command: 'output_line', line: 'linha 2', isError: true}));
+            expect(screen.getByTestId('output-view').getAttribute('data-lines')).toBe('2');
+        });
+
+        it('deve voltar para dashboard após analysis_done com sucesso', async () => {
+            vi.useFakeTimers();
+            render(<App/>);
+            act(() => sendMessage({command: 'analysis_started'}));
+            act(() => sendMessage({command: 'analysis_done', success: true, exitCode: 0}));
+            await act(async () => vi.advanceTimersByTime(600));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+            vi.useRealTimers();
+        });
+
+        it('deve permanecer na aba output se analysis_done falhar', async () => {
+            vi.useFakeTimers();
+            render(<App/>);
+            act(() => sendMessage({command: 'analysis_started'}));
+            act(() => sendMessage({command: 'analysis_done', success: false, exitCode: 1}));
+            await act(async () => vi.advanceTimersByTime(600));
+            expect(screen.getByTestId('output-view')).toBeInTheDocument();
+            vi.useRealTimers();
+        });
+
+        it('deve parar execução ao receber analysis_stopped', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'analysis_started'}));
+            act(() => sendMessage({command: 'analysis_stopped'}));
+            expect(screen.getByTestId('output-view')).toBeInTheDocument();
+        });
+
+        it('deve atualizar yaml ao receber yaml_loaded', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            act(() => sendMessage({command: 'yaml_loaded', yaml: 'novo-yaml'}));
+            expect(screen.getByTestId('action-view')).toBeInTheDocument();
+        });
+
+        it('deve exibir feedback de action_saved por 3s e depois sumir', async () => {
+            vi.useFakeTimers();
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            act(() => sendMessage({command: 'action_saved'}));
+            expect(screen.getByTestId('action-feedback')).toBeInTheDocument();
+            await act(async () => vi.advanceTimersByTime(3000));
+            expect(screen.queryByTestId('action-feedback')).not.toBeInTheDocument();
+            vi.useRealTimers();
+        });
+
+        it('deve exibir feedback de settings_saved por 3s e depois sumir', async () => {
+            vi.useFakeTimers();
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-settings'));
+            act(() => sendMessage({command: 'settings_saved'}));
+            expect(screen.getByTestId('settings-feedback')).toBeInTheDocument();
+            await act(async () => vi.advanceTimersByTime(3000));
+            expect(screen.queryByTestId('settings-feedback')).not.toBeInTheDocument();
+            vi.useRealTimers();
+        });
+
+        it('deve atualizar settings ao receber settings_loaded', () => {
+            render(<App/>);
+            act(() => sendMessage({command: 'settings_loaded', data: {productName: 'Produto X'}}));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
+        });
+
+        it('deve remover o listener de mensagens ao desmontar', () => {
+            const removeSpy = vi.spyOn(window, 'removeEventListener');
+            const {unmount} = render(<App/>);
+            unmount();
+            expect(removeSpy).toHaveBeenCalledWith('message', expect.any(Function));
         });
     });
 });
