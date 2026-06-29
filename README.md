@@ -20,7 +20,7 @@
 
 O painel exibe o score geral **TSQMI**, as três características de qualidade com valores e metas definidas pela equipe, e emite alertas de regressão antes de cada commit.
 
-![Painel principal do plugin mostrando score 0.86 e características Reliability, Maintainability e Functional Suitability](assets/painel-principal.png)
+![Painel principal do plugin mostrando score 0.86 e características Reliability, Maintainability e Functional Suitability](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/painel-principal.png)
 ---
 
 ## O que o plugin faz
@@ -49,7 +49,7 @@ A aba **Grafana** carrega os dashboards diretamente no VS Code, já filtrados pe
 
 ### Lista de dashboards
 
-![Aba Grafana mostrando a lista de 4 dashboards disponíveis](assets/grafana-lista-dashboards.png)
+![Aba Grafana mostrando a lista de 4 dashboards disponíveis](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-lista-dashboards.png)
 
 ---
 
@@ -57,7 +57,7 @@ A aba **Grafana** carrega os dashboards diretamente no VS Code, já filtrados pe
 
 Visão consolidada do produto: contadores de repositórios, arquivos, características e métricas coletadas; gauges de TSQMI por repositório; gráfico **Planejado vs Realizado** por característica; e radar comparando as características entre os repositórios.
 
-![Dashboard Visão Geral de Qualidade com gauges de TSQMI, gráfico Planejado vs Realizado e radar de características](assets/grafana-visao-geral.png)
+![Dashboard Visão Geral de Qualidade com gauges de TSQMI, gráfico Planejado vs Realizado e radar de características](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-visao-geral.png)
 
 ---
 
@@ -65,7 +65,7 @@ Visão consolidada do produto: contadores de repositórios, arquivos, caracterí
 
 Evolução do TSQMI ao longo do tempo no formato de "batimento cardíaco" - uma linha por repositório. Ideal para identificar instabilidades e períodos de queda na qualidade.
 
-![Dashboard de Pulso mostrando evolução do TSQMI em formato ECG para CLI (0.859), Core (0.165) e Front (0.479)](assets/grafana-dashboard-pulso.png)
+![Dashboard de Pulso mostrando evolução do TSQMI em formato ECG para CLI (0.859), Core (0.165) e Front (0.479)](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-dashboard-pulso.png)
 
 ---
 
@@ -75,11 +75,11 @@ Evolução temporal em quatro camadas: **Características → Subcaracterística
 
 **Características e subcaracterísticas:**
 
-![Evolução temporal de Functional Suitability e subcaracterísticas para o repositório CLI](assets/grafana-evolucao-temporal-1.png)
+![Evolução temporal de Functional Suitability e subcaracterísticas para o repositório CLI](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-evolucao-temporal-1.png)
 
 **Medidas e métricas coletadas:**
 
-![Evolução temporal das medidas e métricas coletadas com tooltip mostrando Team Throughput 0.708](assets/grafana-evolucao-temporal-2.png)
+![Evolução temporal das medidas e métricas coletadas com tooltip mostrando Team Throughput 0.708](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-evolucao-temporal-2.png)
 
 ---
 
@@ -87,7 +87,7 @@ Evolução temporal em quatro camadas: **Características → Subcaracterística
 
 Evolução de cada característica individualmente como série temporal, com marcadores de release (v2025.1.0, v2025.2.0, v2025.3.0). Permite avaliar o impacto de cada versão sobre Confiabilidade, Manutenibilidade e Adequação Funcional.
 
-![Dashboard Saúde de Qualidade por Repositório mostrando Confiabilidade, Manutenibilidade e Ad. Funcional com marcadores de release](assets/grafana-saude-qualidade.png)
+![Dashboard Saúde de Qualidade por Repositório mostrando Confiabilidade, Manutenibilidade e Ad. Funcional com marcadores de release](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/grafana-saude-qualidade.png)
 
 ---
 
@@ -95,7 +95,7 @@ Evolução de cada característica individualmente como série temporal, com mar
 
 Executa a action que publica a qualidade de software direto no MeasureSoftGram, com log detalhado no painel Output do VS Code.
 
-![Execução da Action](assets/action.png)
+![Execução da Action](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/action.png)
 
 ---
 
