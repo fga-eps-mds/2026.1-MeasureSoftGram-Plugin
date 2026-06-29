@@ -20,7 +20,9 @@ export type PanelMessage =
     | { command: 'select_repo'; repoPk: number }
     | { command: 'save_action'; yaml: string }
     | { command: 'save_settings'; data: SettingsData }
-    | { command: 'show_warning'; message: string };
+    | { command: 'show_warning'; message: string }
+    | { command: 'request_grafana_dashboards' }
+    | { command: 'request_grafana_dashboard'; uid: string };
 
 export type ExtensionMessage =
     | { command: 'score_loading' }
@@ -35,7 +37,11 @@ export type ExtensionMessage =
     | { command: 'action_saved' }
     | { command: 'published'; release: string }
     | { command: 'settings_saved' }
-    | { command: 'settings_loaded'; data: Partial<SettingsData> };
+    | { command: 'settings_loaded'; data: Partial<SettingsData> }
+    | { command: 'grafana_loading' }
+    | { command: 'grafana_dashboards_loaded'; dashboards: GrafanaDashboard[] }
+    | { command: 'grafana_dashboard_loaded'; url: string; title: string }
+    | { command: 'grafana_error'; message: string };
 
 export interface RepoItem {
     id: number;
@@ -63,7 +69,15 @@ export interface SettingsData {
     workflowName: string;
 }
 
-export type TabName = 'dashboard' | 'output' | 'settings' | 'action';
+export type TabName = 'dashboard' | 'output' | 'settings' | 'action' | 'grafana';
+
+export interface GrafanaDashboard {
+  uid: string;
+  title: string;
+  description: string;
+  tags: string[];
+  has_repo_selector: boolean;
+}
 
 export interface LogLine {
     time: string;

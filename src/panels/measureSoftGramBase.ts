@@ -1,6 +1,8 @@
 import {ExtensionContext, Uri, Webview} from 'vscode';
 import {getNonce, getUri} from '../utilities/utilities';
 import {
+    fetchGrafanaDashboard as defaultFetchGrafanaDashboard,
+    fetchGrafanaDashboards as defaultFetchGrafanaDashboards,
     fetchRepositories as defaultFetchRepositories,
     fetchScoreForRepo as defaultFetchScoreForRepo,
     MsgramSettings,
@@ -145,7 +147,7 @@ export abstract class MeasureSoftGramBase {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}'; frame-src http: https:;">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>MeasureSoftGram</title>
         </head>
@@ -200,8 +202,46 @@ export abstract class MeasureSoftGramBase {
                 await this._loadReposAndScore(fetchRepos, fetchScore);
                 return true;
 
+            case 'request_grafana_dashboards':
+                await this._loadGrafanaDashboards();
+                return true;
+
+            case 'request_grafana_dashboard':
+                await this._loadGrafanaDashboardUrl(message.uid);
+                return true;
+
             default:
                 return false;
+        }
+    }
+
+    private async _loadGrafanaDashboards(): Promise<void> {
+        const webview = this._webview;
+        if (!webview) { return; }
+        webview.postMessage({command: 'grafana_loading'});
+        try {
+            const dashboards = await defaultFetchGrafanaDashboards(this._settings, this.logger());
+            webview.postMessage({command: 'grafana_dashboards_loaded', dashboards});
+        } catch (err: any) {
+            webview.postMessage({command: 'grafana_error', message: err.message ?? 'Erro ao buscar dashboards do Grafana.'});
+        }
+    }
+
+    private async _loadGrafanaDashboardUrl(uid: string): Promise<void> {
+        const webview = this._webview;
+        if (!webview || !this._context) { return; }
+        webview.postMessage({command: 'grafana_loading'});
+        try {
+            const detail = await defaultFetchGrafanaDashboard(
+                this._settings,
+                uid,
+                this._context.productPk,
+                this._selectedRepo?.id,
+                this.logger(),
+            );
+            webview.postMessage({command: 'grafana_dashboard_loaded', url: detail.grafana_url, title: detail.title});
+        } catch (err: any) {
+            webview.postMessage({command: 'grafana_error', message: err.message ?? 'Erro ao buscar dashboard do Grafana.'});
         }
     }
 }

@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {Sidebar} from './components/Sidebar';
 import {Tabs} from './components/Tabs';
 import {DashboardView} from './components/DashboardView';
+import {GrafanaView} from './components/GrafanaView';
 import {OutputView} from './components/action/OutputView.tsx';
 import {SettingsView} from './components/SettingsView';
 import {ActionView} from './components/action/ActionView.tsx';
@@ -11,7 +12,7 @@ import {DEFAULT_WORKFLOW_YAML} from './utils/defaultWorkflow';
 import {applySettingsToYaml} from './utils/workflowYaml';
 import {getMissingSettings} from './utils/validation';
 
-import type {ExtensionMessage, LogLine, RepoItem, ScoreData, SettingsData, TabName,} from './types/index';
+import type {ExtensionMessage, GrafanaDashboard, LogLine, RepoItem, ScoreData, SettingsData, TabName,} from './types/index';
 
 const App: React.FC = () => {
     const vscode = getVSCodeAPI();
@@ -22,6 +23,9 @@ const App: React.FC = () => {
         setActiveTab(tab);
         if (tab === 'action') {
             vscode.postMessage({command: 'request_yaml'});
+        }
+        if (tab === 'grafana') {
+            vscode.postMessage({command: 'request_grafana_dashboards'});
         }
     }, [vscode]);
 
@@ -40,9 +44,14 @@ const App: React.FC = () => {
         setLogLines(prev => [...prev, {time: now(), text, isError}]);
     }, []);
 
-
     const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
     const [settings, setSettings] = useState<Partial<SettingsData>>({});
+
+    const [grafanaDashboards, setGrafanaDashboards] = useState<GrafanaDashboard[]>([]);
+    const [grafanaLoading, setGrafanaLoading] = useState(false);
+    const [grafanaIframeUrl, setGrafanaIframeUrl] = useState<string | null>(null);
+    const [grafanaIframeTitle, setGrafanaIframeTitle] = useState<string | null>(null);
+    const [grafanaError, setGrafanaError] = useState<string | null>(null);
 
     const [yaml, setYaml] = useState(DEFAULT_WORKFLOW_YAML);
     const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
@@ -127,6 +136,27 @@ const App: React.FC = () => {
                 case 'settings_loaded':
                     setSettings(msg.data);
                     break;
+
+                case 'grafana_loading':
+                    setGrafanaLoading(true);
+                    setGrafanaError(null);
+                    break;
+
+                case 'grafana_dashboards_loaded':
+                    setGrafanaLoading(false);
+                    setGrafanaDashboards(msg.dashboards);
+                    break;
+
+                case 'grafana_dashboard_loaded':
+                    setGrafanaLoading(false);
+                    setGrafanaIframeUrl(msg.url);
+                    setGrafanaIframeTitle(msg.title);
+                    break;
+
+                case 'grafana_error':
+                    setGrafanaLoading(false);
+                    setGrafanaError(msg.message);
+                    break;
             }
         };
 
@@ -148,6 +178,15 @@ const App: React.FC = () => {
         const mergedYaml = applySettingsToYaml(yaml, settings);
         setYaml(mergedYaml);
         vscode.postMessage({command: 'save_action', yaml: mergedYaml});
+    };
+
+    const handleSelectGrafanaDashboard = (uid: string) => {
+        vscode.postMessage({command: 'request_grafana_dashboard', uid});
+    };
+
+    const handleGrafanaBack = () => {
+        setGrafanaIframeUrl(null);
+        setGrafanaIframeTitle(null);
     };
 
     const handleRunAction = () => {
@@ -191,6 +230,19 @@ const App: React.FC = () => {
                         showCommitWarn={showCommitWarn}
                         notifText={notifText}
                         notifType={notifType}
+                    />
+                )}
+
+                {activeTab === 'grafana' && (
+                    <GrafanaView
+                        dashboards={grafanaDashboards}
+                        loading={grafanaLoading}
+                        iframeUrl={grafanaIframeUrl}
+                        iframeTitle={grafanaIframeTitle}
+                        error={grafanaError}
+                        hasContext={repos.length > 0}
+                        onSelectDashboard={handleSelectGrafanaDashboard}
+                        onBack={handleGrafanaBack}
                     />
                 )}
 

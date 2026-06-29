@@ -8,9 +8,10 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-    {id: 'dashboard', label: 'Painel', icon: 'ti-chart-radar'},
-    {id: 'settings', label: 'Config', icon: 'ti-settings'},
-    {id: 'action', label: 'Action', icon: 'ti-file-code'},
+    {id: 'dashboard', label: 'Painel',  icon: 'ti-chart-radar'},
+    {id: 'grafana',   label: 'Grafana', icon: 'ti-chart-area'},
+    {id: 'settings',  label: 'Config',  icon: 'ti-settings'},
+    {id: 'action',    label: 'Action',  icon: 'ti-file-code'},
 ];
 
 interface TabsProps {

@@ -634,6 +634,38 @@ body {
     }
 }
 
+/* ── Grafana ──────────────────────────────────────────────────────────── */
+.grafana-card {
+    background: #FFFFFF;
+    border: 1px solid #E0E2E5;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 2px rgba(43,77,111,0.05);
+    transition: border-color .15s, box-shadow .15s;
+}
+.grafana-card:hover {
+    border-color: #2B4D6F;
+    box-shadow: 0 1px 6px rgba(43,77,111,0.14);
+}
+.grafana-card-icon  { font-size: 16px; color: #5F7EA3; flex-shrink: 0; }
+.grafana-card-info  { flex: 1; min-width: 0; }
+.grafana-card-title { font-size: 11px; color: #333; font-family: sans-serif; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grafana-card-sub   { font-size: 10px; color: #888; margin-top: 2px; font-family: sans-serif; display: flex; align-items: center; gap: 3px; }
+.grafana-card-arrow { font-size: 14px; color: #C5C8CC; flex-shrink: 0; }
+
+.grafana-iframe {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: 1px solid #E0E2E5;
+    border-radius: 4px;
+    display: block;
+}
+
 ::-webkit-scrollbar {
     width: 5px;
 }
