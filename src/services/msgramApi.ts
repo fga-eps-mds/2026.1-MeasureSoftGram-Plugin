@@ -121,6 +121,26 @@ export async function login(
   return res.key;
 }
 
+// ── Grafana types ─────────────────────────────────────────────────────────────
+
+export interface GrafanaDashboard {
+  uid: string;
+  title: string;
+  description: string;
+  tags: string[];
+  has_repo_selector: boolean;
+}
+
+export interface GrafanaDashboardDetail {
+  dashboard_uid: string;
+  title: string;
+  grafana_url: string;
+  product_id: number;
+  repository: { id: number; name: string } | null;
+}
+
+// ── Internal types ────────────────────────────────────────────────────────────
+
 interface OrgItem {
   id: number;
   name: string
@@ -179,6 +199,37 @@ export async function fetchRepositories(
 
   return {orgPk, productPk: product.id, repos: reposRes.results};
 }
+
+// ── Grafana ───────────────────────────────────────────────────────────────────
+
+export async function fetchGrafanaDashboards(
+  settings: MsgramSettings,
+  log: Logger = () => {},
+): Promise<GrafanaDashboard[]> {
+  const url = `${settings.serviceUrl}/api/v1/grafana/dashboards/`;
+  log(`[${ts()}] GET ${url}`);
+  const res = await get<{ count: number; results: GrafanaDashboard[] }>(url, settings.token);
+  log(`[${ts()}] → ${res.results.length} dashboard(s) encontrado(s).`);
+  return res.results;
+}
+
+export async function fetchGrafanaDashboard(
+  settings: MsgramSettings,
+  uid: string,
+  productId: number,
+  repositoryId?: number,
+  log: Logger = () => {},
+): Promise<GrafanaDashboardDetail> {
+  const params = new URLSearchParams({ product_id: String(productId) });
+  if (repositoryId !== undefined) { params.set('repository_id', String(repositoryId)); }
+  const url = `${settings.serviceUrl}/api/v1/grafana/dashboard/${uid}/?${params}`;
+  log(`[${ts()}] GET ${url}`);
+  const res = await get<GrafanaDashboardDetail>(url, settings.token);
+  log(`[${ts()}] → Dashboard "${res.title}" — ${res.grafana_url}`);
+  return res;
+}
+
+// ── Score por repositório ─────────────────────────────────────────────────────
 
 export async function fetchScoreForRepo(
     settings: MsgramSettings,
