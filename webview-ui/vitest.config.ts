@@ -11,7 +11,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['lcov', 'text'],
-      reportsDirectory: '../coverage',
+      reportsDirectory: './coverage',
       exclude: ['**/build/**', '**/*.config.{js,ts}', '**/main.tsx'],
     },
   },
