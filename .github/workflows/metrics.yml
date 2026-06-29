@@ -1,0 +1,50 @@
+name: Export de métricas
+
+on:
+  push:
+    branches: [main, develop]
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Criar diretório
+        run: mkdir analytics-raw-data
+
+      - name: Coletar métricas no SonarCloud
+        run: python parser.py ${{ github.event.repository.name }} ${{ github.ref_name }}
+
+      - name: Envia métricas para repo de Doc
+        run: |
+          git config --global user.email "${{secrets.USER_EMAIL}}"
+          git config --global user.name "${{secrets.USER_NAME}}"
+          git clone --single-branch --branch main "https://x-access-token:${{secrets.API_TOKEN_DOC}}@github.com/fga-eps-mds/2026.1-MeasureSoftGram-DOC" doc
+          mkdir -p doc/Analytics/data
+          cp -R analytics-raw-data/*.json doc/Analytics/data
+          cd doc/
+          git add .
+          git commit -m "Adicionando métricas do repositório ${{ github.event.repository.name }} ${{ github.ref_name }}"
+          git push
+
+      - name: Envia métricas como assets da release
+        if: startsWith(github.ref, 'refs/tags')
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          files: 'analytics-raw-data/*'
+          repo-token: ${{ secrets.TOKEN_GITHUB }}
+          release-tag: ${{ github.ref_name }}

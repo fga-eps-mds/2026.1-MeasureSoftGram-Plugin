@@ -1,0 +1,11 @@
+services:
+  act-runner:
+    build:
+      context: .
+      args:
+        ACT_VERSION: "0.2.89"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${WORKSPACE_PATH}:/workspace
+    working_dir: /workspace
+    command: ["-W", "/workspace/${WORKFLOW_REL_PATH}"]

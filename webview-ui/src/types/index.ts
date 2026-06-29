@@ -1,0 +1,86 @@
+export interface VSCodeAPI {
+    postMessage(message: PanelMessage): void;
+
+    getState(): unknown;
+
+    setState(state: unknown): void;
+}
+
+declare global {
+    function acquireVsCodeApi(): VSCodeAPI;
+}
+
+export type PanelMessage =
+    | { command: 'run_analysis' }
+    | { command: 'stop_analysis' }
+    | { command: 'run_action'; yaml: string }
+    | { command: 'publish' }
+    | { command: 'request_yaml' }
+    | { command: 'request_score' }
+    | { command: 'select_repo'; repoPk: number }
+    | { command: 'save_action'; yaml: string }
+    | { command: 'save_settings'; data: SettingsData }
+    | { command: 'show_warning'; message: string }
+    | { command: 'request_grafana_dashboards' }
+    | { command: 'request_grafana_dashboard'; uid: string };
+
+export type ExtensionMessage =
+    | { command: 'score_loading' }
+    | { command: 'score_loaded'; data: ScoreData }
+    | { command: 'score_error'; message: string }
+    | { command: 'repos_loaded'; repos: RepoItem[] }
+    | { command: 'analysis_started' }
+    | { command: 'output_line'; line: string; isError: boolean }
+    | { command: 'analysis_done'; success: boolean; exitCode: number }
+    | { command: 'analysis_stopped' }
+    | { command: 'yaml_loaded'; yaml: string }
+    | { command: 'action_saved' }
+    | { command: 'published'; release: string }
+    | { command: 'settings_saved' }
+    | { command: 'settings_loaded'; data: Partial<SettingsData> }
+    | { command: 'grafana_loading' }
+    | { command: 'grafana_dashboards_loaded'; dashboards: GrafanaDashboard[] }
+    | { command: 'grafana_dashboard_loaded'; url: string; title: string }
+    | { command: 'grafana_error'; message: string };
+
+export interface RepoItem {
+    id: number;
+    name: string;
+}
+
+export interface Characteristic {
+    name: string;
+    value: number;
+    goal: number;
+}
+
+export interface ScoreData {
+    score: number;
+    characteristics: Characteristic[];
+    noData?: boolean;
+}
+
+export interface SettingsData {
+    serviceUrl: string;
+    msgramServiceToken: string;
+    githubToken: string;
+    sonarProjectKey: string;
+    productName: string;
+    workflowName: string;
+}
+
+export type TabName = 'dashboard' | 'output' | 'settings' | 'action' | 'grafana';
+
+export interface GrafanaDashboard {
+  uid: string;
+  title: string;
+  description: string;
+  tags: string[];
+  has_repo_selector: boolean;
+}
+
+export interface LogLine {
+    time: string;
+    text: string;
+    isError: boolean;
+}
