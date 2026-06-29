@@ -160,4 +160,31 @@ describe('SettingsView', () => {
             expect(mockSetState).toHaveBeenCalled();
         });
     });
+
+    describe('savedFeedback', () => {
+        it('não deve exibir o feedback quando savedFeedback é false', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            expect(document.getElementById('save-fb')).not.toBeInTheDocument();
+        });
+
+        it('deve exibir o feedback "Conexão validada" quando savedFeedback é true', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={true}/>);
+            expect(document.getElementById('save-fb')).toBeInTheDocument();
+            expect(screen.getByText(/Conexão validada/)).toBeInTheDocument();
+        });
+    });
+
+    describe('sincronização via useEffect', () => {
+        it('deve sincronizar os campos quando initialData muda de vazio para preenchido', () => {
+            const {rerender} = render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            rerender(<SettingsView initialData={FULL_DATA} onSave={onSave} savedFeedback={false}/>);
+            expect(screen.getByDisplayValue('https://api.example.com/')).toBeInTheDocument();
+        });
+
+        it('não deve re-sincronizar quando initialData continua vazio', () => {
+            const {rerender} = render(<SettingsView initialData={{}} onSave={onSave} savedFeedback={false}/>);
+            rerender(<SettingsView initialData={{}} onSave={onSave} savedFeedback={false}/>);
+            expect(screen.getByDisplayValue('https://msgram-api.synaptha.com/')).toBeInTheDocument();
+        });
+    });
 });
