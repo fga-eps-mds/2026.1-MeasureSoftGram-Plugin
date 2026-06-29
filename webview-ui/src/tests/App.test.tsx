@@ -279,4 +279,50 @@ describe('App', () => {
             expect(removeSpy).toHaveBeenCalledWith('message', expect.any(Function));
         });
     });
+
+    describe('ações do usuário', () => {
+        it('deve enviar save_settings ao salvar configurações', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-settings'));
+            fireEvent.click(screen.getByTestId('settings-save'));
+            expect(mockPostMessage).toHaveBeenCalledWith(
+                expect.objectContaining({command: 'save_settings'}),
+            );
+        });
+
+        it('deve enviar save_action com yaml mesclado ao salvar action', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            fireEvent.click(screen.getByTestId('action-save'));
+            expect(mockPostMessage).toHaveBeenCalledWith({command: 'save_action', yaml: 'yaml-merged'});
+        });
+
+        it('deve enviar run_action quando settings estão completos', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            fireEvent.click(screen.getByTestId('action-run'));
+            expect(mockPostMessage).toHaveBeenCalledWith({command: 'run_action', yaml: 'yaml-merged'});
+        });
+
+        it('deve exibir alerta e enviar show_warning quando settings estão incompletos', () => {
+            mockGetMissingSettings.mockReturnValueOnce([{label: 'GitHub Token', field: 'githubToken'}]);
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            fireEvent.click(screen.getByTestId('action-run'));
+            expect(mockPostMessage).toHaveBeenCalledWith(
+                expect.objectContaining({command: 'show_warning'}),
+            );
+            expect(screen.getByTestId('action-alert')).toBeInTheDocument();
+        });
+
+        it('não deve enviar run_action quando settings estão incompletos', () => {
+            mockGetMissingSettings.mockReturnValueOnce([{label: 'GitHub Token', field: 'githubToken'}]);
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            fireEvent.click(screen.getByTestId('action-run'));
+            expect(mockPostMessage).not.toHaveBeenCalledWith(
+                expect.objectContaining({command: 'run_action'}),
+            );
+        });
+    });
 });
