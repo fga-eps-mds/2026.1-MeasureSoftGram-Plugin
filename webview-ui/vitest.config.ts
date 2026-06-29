@@ -7,10 +7,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/tests/setup.ts',
+    exclude: ['**/build/**', '**/node_modules/**'],
     coverage: {
       provider: 'v8',
       reporter: ['lcov', 'text'],
       reportsDirectory: '../coverage',
+      exclude: ['**/build/**', '**/*.config.{js,ts}', '**/main.tsx'],
     },
   },
 });
