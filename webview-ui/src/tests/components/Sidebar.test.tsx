@@ -1,6 +1,7 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Sidebar} from '../../components/Sidebar';
+import type {RepoItem, ScoreData} from '../../types';
 
 vi.mock('../../../utils/helpers', () => ({
     getCharStatus: vi.fn(() => 'ok'),
@@ -8,6 +9,19 @@ vi.mock('../../../utils/helpers', () => ({
     escHtml: vi.fn((t: string) => t),
     now: vi.fn(() => '00:00:00'),
 }));
+
+const REPOS: RepoItem[] = [
+    {id: 1, name: 'repo-alpha'},
+    {id: 2, name: 'repo-beta'},
+];
+
+const SCORE_DATA: ScoreData = {
+    score: 0.87,
+    characteristics: [
+        {name: 'Reliability', value: 0.9, goal: 0.8},
+        {name: 'Maintainability', value: 0.75, goal: 0.85},
+    ],
+};
 
 const DEFAULT_PROPS = {
     scoreData: null,
@@ -37,5 +51,44 @@ describe('Sidebar', () => {
         });
     });
 
+    describe('seletor de repositório', () => {
+        it('não deve renderizar o select quando não há repos', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={[]}/>);
+            expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+        });
 
+        it('deve renderizar o select quando há repos', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS}/>);
+            expect(screen.getByRole('combobox')).toBeInTheDocument();
+        });
+
+        it('deve renderizar uma option para cada repo', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS}/>);
+            expect(screen.getByRole('option', {name: 'repo-alpha'})).toBeInTheDocument();
+            expect(screen.getByRole('option', {name: 'repo-beta'})).toBeInTheDocument();
+        });
+
+        it('deve refletir o repo selecionado no valor do select', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS} selectedRepoPk={2}/>);
+            expect(screen.getByRole('combobox')).toHaveValue('2');
+        });
+
+        it('deve chamar onSelectRepo com o id correto ao mudar seleção', () => {
+            const onSelectRepo = vi.fn();
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS} onSelectRepo={onSelectRepo}/>);
+            fireEvent.change(screen.getByRole('combobox'), {target: {value: '2'}});
+            expect(onSelectRepo).toHaveBeenCalledWith(2);
+        });
+
+        it('deve exibir "produto não encontrado" e desabilitar option quando scoreError', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS} scoreError={true}/>);
+            const option = screen.getByRole('option', {name: 'produto não encontrado'});
+            expect(option).toBeDisabled();
+        });
+
+        it('deve usar value vazio no select quando scoreError', () => {
+            render(<Sidebar {...DEFAULT_PROPS} repos={REPOS} scoreError={true} selectedRepoPk={1}/>);
+            expect(screen.getByRole('combobox')).toHaveValue('');
+        });
+    });
 });
