@@ -10,8 +10,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: MeasureSoftGram
-        uses: fga-eps-mds/2023-1-MeasureSoftGram-Action@v2.1
+      - name: Action MeasureSoftGram
+        uses: fga-eps-mds/MeasureSoftGram-Action@2.1.5
         id: msgram
         with:
           githubToken: # Token do GitHub
