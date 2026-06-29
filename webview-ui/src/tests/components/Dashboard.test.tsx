@@ -39,4 +39,21 @@ describe('DashboardView', () => {
             expect(screen.getByText(/sem produto configurado/)).toBeInTheDocument();
         });
     });
+
+    describe('loading state', () => {
+        it('deve exibir spinner quando scoreLoading é true', () => {
+            render(<DashboardView {...defaultProps} scoreLoading={true} />);
+            expect(screen.getByText(/Carregando dados do produto/i)).toBeInTheDocument();
+        });
+
+        it('não deve exibir spinner quando scoreLoading é false', () => {
+            render(<DashboardView {...defaultProps} scoreLoading={false} />);
+            expect(screen.queryByText(/Carregando dados do produto/i)).not.toBeInTheDocument();
+        });
+
+        it('não deve exibir o score hero durante o loading', () => {
+            render(<DashboardView {...defaultProps} scoreLoading={true} />);
+            expect(screen.queryByText('0.82')).not.toBeInTheDocument();
+        });
+    });
 });
