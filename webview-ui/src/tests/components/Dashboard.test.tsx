@@ -56,4 +56,37 @@ describe('DashboardView', () => {
             expect(screen.queryByText('0.82')).not.toBeInTheDocument();
         });
     });
+
+    describe('no data warning', () => {
+        it('deve exibir aviso quando scoreData.noData é true', () => {
+            const noDataScore = { ...mockScoreData, noData: true };
+            render(<DashboardView {...defaultProps} scoreData={noDataScore} />);
+            expect(screen.getByText(/ainda não possui métricas calculadas/i)).toBeInTheDocument();
+        });
+
+        it('não deve exibir aviso quando noData é false', () => {
+            render(<DashboardView {...defaultProps} />);
+            expect(screen.queryByText(/ainda não possui métricas calculadas/i)).not.toBeInTheDocument();
+        });
+    });
+
+    describe('commit warning', () => {
+        it('deve exibir aviso de commit com a pior característica', () => {
+            render(<DashboardView {...defaultProps} showCommitWarn={true} />);
+
+            const commitWarn = document.getElementById('commit-warn');
+            expect(commitWarn).toBeInTheDocument();
+            expect(commitWarn).toHaveTextContent('Reliability');
+        });
+
+        it('não deve exibir aviso de commit quando showCommitWarn é false', () => {
+            render(<DashboardView {...defaultProps} showCommitWarn={false} />);
+            expect(screen.queryByText(/Atenção antes do commit/i)).not.toBeInTheDocument();
+        });
+
+        it('não deve exibir aviso de commit quando scoreData é null', () => {
+            render(<DashboardView {...defaultProps} scoreData={null} showCommitWarn={true} />);
+            expect(screen.queryByText(/Atenção antes do commit/i)).not.toBeInTheDocument();
+        });
+    });
 });
