@@ -144,5 +144,52 @@ describe('Sidebar', () => {
         });
     });
 
+    describe('características', () => {
+        it('deve exibir "carregando..." quando scoreLoading é true', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreLoading={true}/>);
+            expect(screen.getByText(/carregando\.\.\./)).toBeInTheDocument();
+        });
 
+        it('deve exibir "carregando..." quando scoreData é null sem estar carregando', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={null} scoreLoading={false}/>);
+            expect(screen.getByText(/carregando\.\.\./)).toBeInTheDocument();
+        });
+
+        it('deve exibir "nenhum dado disponível" quando noData', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={{score: 0, characteristics: [], noData: true}}/>);
+            expect(screen.getByText('nenhum dado disponível')).toBeInTheDocument();
+        });
+
+        it('deve renderizar o nome de cada característica', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            expect(screen.getByText(/Reliability/)).toBeInTheDocument();
+            expect(screen.getByText(/Maintainability/)).toBeInTheDocument();
+        });
+
+        it('deve exibir o valor formatado de cada característica', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            expect(screen.getByText('0.90')).toBeInTheDocument();
+            expect(screen.getByText('0.75')).toBeInTheDocument();
+        });
+
+        it('deve chamar onShowTab com "dashboard" ao clicar em uma característica', () => {
+            const onShowTab = vi.fn();
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA} onShowTab={onShowTab}/>);
+            fireEvent.click(screen.getAllByText(/Reliability/)[0].closest('.mrow')!);
+            expect(onShowTab).toHaveBeenCalledWith('dashboard');
+        });
+
+        it('deve renderizar a barra de progresso para cada característica', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            const fills = document.querySelectorAll('.barfill');
+            expect(fills).toHaveLength(2);
+        });
+
+        it('deve aplicar a largura correta na barra de progresso', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            const fills = document.querySelectorAll('.barfill') as NodeListOf<HTMLElement>;
+            expect(fills[0].style.width).toBe('90%');
+            expect(fills[1].style.width).toBe('75%');
+        });
+    });
 });
