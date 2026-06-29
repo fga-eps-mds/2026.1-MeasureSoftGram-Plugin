@@ -71,5 +71,11 @@ describe('Tabs', () => {
         const {container} = render(<Tabs active="dashboard" onSelect={onSelect}/>);
         expect(container.firstChild).toHaveClass('tabs');
     });
-    
+
+    it('cada aba deve ter a classe "tab"', () => {
+        render(<Tabs active="dashboard" onSelect={onSelect}/>);
+        TabsTest.forEach(({id}) => {
+            expect(document.getElementById(`tab-${id}`)).toHaveClass('tab');
+        });
+    });
 });
