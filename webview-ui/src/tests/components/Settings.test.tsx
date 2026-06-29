@@ -18,6 +18,15 @@ const {mockGetState, mockSetState} = vi.hoisted(() => {
 
 const {SettingsView} = await import('../../components/SettingsView');
 
+const DEFAULT_VALUES: SettingsData = {
+    serviceUrl: 'https://msgram-api.synaptha.com/',
+    msgramServiceToken: '',
+    githubToken: '',
+    sonarProjectKey: '',
+    productName: 'measuresoftgram 2026',
+    workflowName: 'Build',
+};
+
 const FULL_DATA: SettingsData = {
     serviceUrl: 'https://api.example.com/',
     msgramServiceToken: 'token-123',
@@ -114,6 +123,41 @@ describe('SettingsView', () => {
             });
             const call = mockSetState.mock.calls[0][0] as Record<string, unknown>;
             expect((call.settingsDraft as SettingsData).productName).toBe('Produto Teste');
+        });
+    });
+
+    describe('handleSave', () => {
+        it('deve chamar onSave ao clicar no botão salvar', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.click(screen.getByRole('button'));
+            expect(onSave).toHaveBeenCalledTimes(1);
+        });
+
+        it('deve chamar onSave com os valores padrão quando nenhum campo foi alterado', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.click(screen.getByRole('button'));
+            expect(onSave).toHaveBeenCalledWith(DEFAULT_VALUES);
+        });
+
+        it('deve chamar onSave com os dados atualizados após edição', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.change(document.getElementById('inp-product')!, {
+                target: {value: 'Produto Novo'},
+            });
+            fireEvent.click(screen.getByRole('button'));
+            expect(onSave).toHaveBeenCalledWith(expect.objectContaining({productName: 'Produto Novo'}));
+        });
+
+        it('deve chamar onSave com os valores de initialData', () => {
+            render(<SettingsView initialData={FULL_DATA} onSave={onSave} savedFeedback={false}/>);
+            fireEvent.click(screen.getByRole('button'));
+            expect(onSave).toHaveBeenCalledWith(FULL_DATA);
+        });
+
+        it('deve chamar setState para persistir o draft ao salvar', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.click(screen.getByRole('button'));
+            expect(mockSetState).toHaveBeenCalled();
         });
     });
 });
