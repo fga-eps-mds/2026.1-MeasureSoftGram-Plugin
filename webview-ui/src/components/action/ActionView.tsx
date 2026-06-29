@@ -36,7 +36,7 @@ export const ActionView: React.FC<ActionViewProps> = ({
             <div className="notif" style={{marginBottom: 12}}>
                 <i className="ti ti-info-circle"/>
                 <span>
-                    Edite o <code style={{color: '#2B4D6F', fontWeight: 600}}>msgram.yml</code> abaixo.
+                    Edite o <strong>msgram.yml</strong> abaixo.
                 </span>
             </div>
 

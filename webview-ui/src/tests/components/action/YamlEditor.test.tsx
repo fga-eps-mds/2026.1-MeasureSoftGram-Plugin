@@ -19,11 +19,6 @@ describe('YamlEditor', () => {
         expect(screen.getByRole('textbox')).toHaveValue('foo: bar');
     });
 
-    it('deve renderizar o label msgram.yml', () => {
-        render(<YamlEditor value="" onChange={onChange}/>);
-        expect(screen.getByText(/msgram\.yml/i)).toBeInTheDocument();
-    });
-
     it('deve chamar onChange ao digitar no textarea', () => {
         render(<YamlEditor value="" onChange={onChange}/>);
         fireEvent.change(screen.getByRole('textbox'), {

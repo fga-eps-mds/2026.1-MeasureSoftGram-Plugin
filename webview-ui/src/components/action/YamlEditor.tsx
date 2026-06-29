@@ -53,14 +53,6 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({value, onChange}) => {
 
     return (
         <div className="fg">
-            <label className="fl" style={{marginBottom: 5}}>
-                <i
-                    className="ti ti-file-code"
-                    style={{fontSize: 12, verticalAlign: '-1px', marginRight: 3}}
-                />
-                msgram.yml
-            </label>
-
             <div className="yaml-editor-shell">
         <pre
             id="yaml-preview"
