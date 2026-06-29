@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {OutputView} from '../../../components/action/OutputView';
 import type {LogLine} from '../../../types';
+import * as helpers from '../../../utils/helpers.ts';
 
 vi.mock('../../../utils/helpers.ts', () => ({
     escHtml: vi.fn((text: string) => text),
@@ -51,5 +52,15 @@ describe('OutputView', () => {
         expect(spans[2]).toHaveTextContent('terceira');
     });
 
+    it('deve lidar com texto vazio em uma linha sem quebrar', () => {
+        const lines = makeLines([{text: ''}]);
+        expect(() => render(<OutputView lines={lines}/>)).not.toThrow();
+    });
 
+    it('deve lidar com um grande volume de linhas sem quebrar', () => {
+        const lines = makeLines(Array.from({length: 500}, (_, i) => ({text: `log ${i}`})));
+        expect(() => render(<OutputView lines={lines}/>)).not.toThrow();
+        expect(screen.getByText('log 0')).toBeInTheDocument();
+        expect(screen.getByText('log 499')).toBeInTheDocument();
+    });
 });
