@@ -1,231 +1,226 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Sidebar }       from './components/Sidebar';
-import { Tabs }          from './components/Tabs';
-import { DashboardView } from './components/DashboardView';
-import { OutputView }    from './components/action/OutputView.tsx';
-import { SettingsView }  from './components/SettingsView';
-import { ActionView }    from './components/action/ActionView.tsx';
-import { getVSCodeAPI }  from './utils/vscode';
-import { now }           from './utils/helpers';
-import { DEFAULT_WORKFLOW_YAML } from './utils/defaultWorkflow';
-import { applySettingsToYaml }   from './utils/workflowYaml';
-import { getMissingSettings }    from './utils/validation';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Sidebar} from './components/Sidebar';
+import {Tabs} from './components/Tabs';
+import {DashboardView} from './components/DashboardView';
+import {OutputView} from './components/action/OutputView.tsx';
+import {SettingsView} from './components/SettingsView';
+import {ActionView} from './components/action/ActionView.tsx';
+import {getVSCodeAPI} from './utils/vscode';
+import {now} from './utils/helpers';
+import {DEFAULT_WORKFLOW_YAML} from './utils/defaultWorkflow';
+import {applySettingsToYaml} from './utils/workflowYaml';
+import {getMissingSettings} from './utils/validation';
 
-import type {
-  TabName,
-  ScoreData,
-  LogLine,
-  SettingsData,
-  ExtensionMessage,
-  RepoItem,
-} from './types/index';
+import type {ExtensionMessage, LogLine, RepoItem, ScoreData, SettingsData, TabName,} from './types/index';
 
 const App: React.FC = () => {
-  const vscode = getVSCodeAPI();
+    const vscode = getVSCodeAPI();
 
-  const [activeTab, setActiveTab] = useState<TabName>('dashboard');
+    const [activeTab, setActiveTab] = useState<TabName>('dashboard');
 
-  const showTab = useCallback((tab: TabName) => {
-    setActiveTab(tab);
-    if (tab === 'action') {
-      vscode.postMessage({ command: 'request_yaml' });
-    }
-  }, [vscode]);
+    const showTab = useCallback((tab: TabName) => {
+        setActiveTab(tab);
+        if (tab === 'action') {
+            vscode.postMessage({command: 'request_yaml'});
+        }
+    }, [vscode]);
 
-  const [scoreData, setScoreData]           = useState<ScoreData | null>(null);
-  const [scoreLoading, setScoreLoading]     = useState(true);
-  const [repos, setRepos]                   = useState<RepoItem[]>([]);
-  const [selectedRepoPk, setSelectedRepoPk] = useState<number | null>(null);
-  const [notifText, setNotifText]           = useState('');
-  const [notifType, setNotifType]           = useState<'ok' | 'error'>('ok');
+    const [scoreData, setScoreData] = useState<ScoreData | null>(null);
+    const [scoreLoading, setScoreLoading] = useState(true);
+    const [repos, setRepos] = useState<RepoItem[]>([]);
+    const [selectedRepoPk, setSelectedRepoPk] = useState<number | null>(null);
+    const [notifText, setNotifText] = useState('');
+    const [notifType, setNotifType] = useState<'ok' | 'error'>('ok');
 
-  const [isRunning, setIsRunning]           = useState(false);
-  const [showCommitWarn, setShowCommitWarn] = useState(true);
-  const [logLines, setLogLines]             = useState<LogLine[]>([]);
+    const [isRunning, setIsRunning] = useState(false);
+    const [showCommitWarn, setShowCommitWarn] = useState(true);
+    const [logLines, setLogLines] = useState<LogLine[]>([]);
 
-  const appendLog = useCallback((text: string, isError: boolean) => {
-    setLogLines(prev => [...prev, { time: now(), text, isError }]);
-  }, []);
+    const appendLog = useCallback((text: string, isError: boolean) => {
+        setLogLines(prev => [...prev, {time: now(), text, isError}]);
+    }, []);
 
 
-  const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
-  const [settings, setSettings] = useState<Partial<SettingsData>>({});
+    const [settingsSavedFeedback, setSettingsSavedFeedback] = useState(false);
+    const [settings, setSettings] = useState<Partial<SettingsData>>({});
 
-  const [yaml, setYaml]                           = useState(DEFAULT_WORKFLOW_YAML);
-  const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
-  const [actionAlert, setActionAlert]             = useState<string | null>(null);
+    const [yaml, setYaml] = useState(DEFAULT_WORKFLOW_YAML);
+    const [actionSavedFeedback, setActionSavedFeedback] = useState(false);
+    const [actionAlert, setActionAlert] = useState<string | null>(null);
 
-  useEffect(() => {
-    vscode.postMessage({ command: 'request_score' });
-  }, [vscode]);
+    useEffect(() => {
+        vscode.postMessage({command: 'request_score'});
+    }, [vscode]);
 
-  useEffect(() => {
-    const handler = (event: MessageEvent<ExtensionMessage>) => {
-      const msg = event.data;
-      switch (msg.command) {
+    useEffect(() => {
+        const handler = (event: MessageEvent<ExtensionMessage>) => {
+            const msg = event.data;
+            switch (msg.command) {
 
-        case 'repos_loaded':
-          setRepos(msg.repos);
-          if (msg.repos.length) { setSelectedRepoPk(msg.repos[0].id); }
-          break;
+                case 'repos_loaded':
+                    setRepos(msg.repos);
+                    if (msg.repos.length) {
+                        setSelectedRepoPk(msg.repos[0].id);
+                    }
+                    break;
 
-        case 'score_loading':
-          setScoreLoading(true);
-          break;
+                case 'score_loading':
+                    setScoreLoading(true);
+                    break;
 
-        case 'score_loaded':
-          setScoreLoading(false);
-          setNotifText('');
-          setScoreData(msg.data);
-          break;
+                case 'score_loaded':
+                    setScoreLoading(false);
+                    setNotifText('');
+                    setScoreData(msg.data);
+                    break;
 
-        case 'score_error':
-          setScoreLoading(false);
-          setScoreData(null);
-          setNotifText(msg.message);
-          setNotifType('error');
-          break;
+                case 'score_error':
+                    setScoreLoading(false);
+                    setScoreData(null);
+                    setNotifText(msg.message);
+                    setNotifType('error');
+                    break;
 
-        case 'analysis_started':
-          setIsRunning(true);
-          setLogLines([]);
-          showTab('output');
-          break;
+                case 'analysis_started':
+                    setIsRunning(true);
+                    setLogLines([]);
+                    showTab('output');
+                    break;
 
-        case 'output_line':
-          appendLog(msg.line, msg.isError);
-          break;
+                case 'output_line':
+                    appendLog(msg.line, msg.isError);
+                    break;
 
-        case 'analysis_done':
-          setIsRunning(false);
-          setShowCommitWarn(false);
-          appendLog(
-            msg.success
-              ? 'act concluído com sucesso.'
-              : `act encerrou com código ${msg.exitCode}.`,
-            !msg.success,
-          );
-          if (msg.success) {
-            setTimeout(() => showTab('dashboard'), 600);
-          }
-          break;
+                case 'analysis_done':
+                    setIsRunning(false);
+                    setShowCommitWarn(false);
+                    appendLog(
+                        msg.success
+                            ? 'act concluído com sucesso.'
+                            : `act encerrou com código ${msg.exitCode}.`,
+                        !msg.success,
+                    );
+                    if (msg.success) {
+                        setTimeout(() => showTab('dashboard'), 600);
+                    }
+                    break;
 
-        case 'analysis_stopped':
-          setIsRunning(false);
-          appendLog('Execução interrompida pelo usuário.', true);
-          break;
+                case 'analysis_stopped':
+                    setIsRunning(false);
+                    appendLog('Execução interrompida pelo usuário.', true);
+                    break;
 
-        case 'yaml_loaded':
-          setYaml(msg.yaml);
-          break;
+                case 'yaml_loaded':
+                    setYaml(msg.yaml);
+                    break;
 
-        case 'action_saved':
-          setActionSavedFeedback(true);
-          setTimeout(() => setActionSavedFeedback(false), 3000);
-          break;
+                case 'action_saved':
+                    setActionSavedFeedback(true);
+                    setTimeout(() => setActionSavedFeedback(false), 3000);
+                    break;
 
-        case 'settings_saved':
-          setSettingsSavedFeedback(true);
-          setTimeout(() => setSettingsSavedFeedback(false), 3000);
-          break;
+                case 'settings_saved':
+                    setSettingsSavedFeedback(true);
+                    setTimeout(() => setSettingsSavedFeedback(false), 3000);
+                    break;
 
-        case 'settings_loaded':
-          setSettings(msg.data);
-          break;
-      }
+                case 'settings_loaded':
+                    setSettings(msg.data);
+                    break;
+            }
+        };
+
+        window.addEventListener('message', handler);
+        return () => window.removeEventListener('message', handler);
+    }, [showTab, appendLog]);
+
+    const handleSelectRepo = (repoPk: number) => {
+        setSelectedRepoPk(repoPk);
+        vscode.postMessage({command: 'select_repo', repoPk});
     };
 
-    window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
-  }, [showTab, appendLog]);
+    const handleSaveSettings = (data: SettingsData) => {
+        setSettings(data);
+        vscode.postMessage({command: 'save_settings', data});
+    };
 
-  const handleSelectRepo = (repoPk: number) => {
-    setSelectedRepoPk(repoPk);
-    vscode.postMessage({ command: 'select_repo', repoPk });
-  };
+    const handleSaveAction = () => {
+        const mergedYaml = applySettingsToYaml(yaml, settings);
+        setYaml(mergedYaml);
+        vscode.postMessage({command: 'save_action', yaml: mergedYaml});
+    };
 
-  const handleSaveSettings = (data: SettingsData) => {
-    setSettings(data);
-    vscode.postMessage({ command: 'save_settings', data });
-  };
+    const handleRunAction = () => {
+        const missing = getMissingSettings(settings);
+        if (missing.length > 0) {
+            const message =
+                'Preencha os campos obrigatórios em Settings antes de rodar a pipeline: ' +
+                missing.map((m) => m.label).join(', ');
+            setActionAlert(message);
+            vscode.postMessage({command: 'show_warning', message});
+            return;
+        }
+        setActionAlert(null);
+        const mergedYaml = applySettingsToYaml(yaml, settings);
+        setYaml(mergedYaml);
+        vscode.postMessage({command: 'run_action', yaml: mergedYaml});
+    };
 
-  const handleSaveAction = () => {
-    const mergedYaml = applySettingsToYaml(yaml, settings);
-    setYaml(mergedYaml);
-    vscode.postMessage({ command: 'save_action', yaml: mergedYaml });
-  };
+    return (
+        <>
+            <Sidebar
+                scoreData={scoreData}
+                scoreLoading={scoreLoading}
+                scoreError={!scoreLoading && scoreData === null && notifType === 'error'}
+                repos={repos}
+                selectedRepoPk={selectedRepoPk}
+                onSelectRepo={handleSelectRepo}
+                activeTab={activeTab}
+                onShowTab={showTab}
+            />
 
-  const handleRunAction = () => {
-    const missing = getMissingSettings(settings);
-    if (missing.length > 0) {
-      const message =
-        'Preencha os campos obrigatórios em Settings antes de rodar a pipeline: ' +
-        missing.map((m) => m.label).join(', ');
-      setActionAlert(message);
-      vscode.postMessage({ command: 'show_warning', message });
-      return;
-    }
-    setActionAlert(null);
-    const mergedYaml = applySettingsToYaml(yaml, settings);
-    setYaml(mergedYaml);
-    vscode.postMessage({ command: 'run_action', yaml: mergedYaml });
-  };
+            <Tabs active={activeTab} onSelect={showTab}/>
 
-  return (
-    <>
-      <Sidebar
-        scoreData={scoreData}
-        scoreLoading={scoreLoading}
-        scoreError={!scoreLoading && scoreData === null && notifType === 'error'}
-        repos={repos}
-        selectedRepoPk={selectedRepoPk}
-        onSelectRepo={handleSelectRepo}
-        activeTab={activeTab}
-        onShowTab={showTab}
-      />
+            <div className="pc">
 
-      <Tabs active={activeTab} onSelect={showTab} />
+                {activeTab === 'dashboard' && (
+                    <DashboardView
+                        scoreData={scoreData}
+                        scoreLoading={scoreLoading}
+                        productName={settings.productName ?? ''}
+                        showCommitWarn={showCommitWarn}
+                        notifText={notifText}
+                        notifType={notifType}
+                    />
+                )}
 
-      <div className="pc">
+                {activeTab === 'output' && (
+                    <OutputView lines={logLines}/>
+                )}
 
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            scoreData={scoreData}
-            scoreLoading={scoreLoading}
-            productName={settings.productName ?? ''}
-            showCommitWarn={showCommitWarn}
-            notifText={notifText}
-            notifType={notifType}
-          />
-        )}
+                {activeTab === 'settings' && (
+                    <SettingsView
+                        initialData={settings}
+                        onSave={handleSaveSettings}
+                        savedFeedback={settingsSavedFeedback}
+                    />
+                )}
 
-        {activeTab === 'output' && (
-          <OutputView lines={logLines} />
-        )}
+                {activeTab === 'action' && (
+                    <ActionView
+                        yaml={yaml}
+                        onChange={setYaml}
+                        onSave={handleSaveAction}
+                        savedFeedback={actionSavedFeedback}
+                        onRun={handleRunAction}
+                        running={isRunning}
+                        alert={actionAlert}
+                    />
+                )}
 
-        {activeTab === 'settings' && (
-          <SettingsView
-            initialData={settings}
-            onSave={handleSaveSettings}
-            savedFeedback={settingsSavedFeedback}
-          />
-        )}
-
-        {activeTab === 'action' && (
-          <ActionView
-            yaml={yaml}
-            onChange={setYaml}
-            onSave={handleSaveAction}
-            savedFeedback={actionSavedFeedback}
-            onRun={handleRunAction}
-            running={isRunning}
-            alert={actionAlert}
-          />
-        )}
-
-      </div>
-    </>
-  );
+            </div>
+        </>
+    );
 };
 
 export default App;

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { DEFAULT_WORKFLOW_YAML } from '../../utils/defaultWorkflow';
+import {describe, expect, it} from 'vitest';
+import {DEFAULT_WORKFLOW_YAML} from '../../utils/defaultWorkflow';
 
 describe('DEFAULT_WORKFLOW_YAML', () => {
     it('deve conter o nome do workflow', () => {

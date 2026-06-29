@@ -1,4 +1,4 @@
-import type { SettingsData } from '../types';
+import type {SettingsData} from '../types';
 
 /**
  * Atualiza, dentro do YAML, apenas as linhas dos 5 inputs configuráveis

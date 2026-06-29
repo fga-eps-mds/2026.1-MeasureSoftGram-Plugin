@@ -26,31 +26,32 @@ export const ActionView: React.FC<ActionViewProps> = ({
     <div className="vw" id="view-action">
         <div className="sf">
             {alert && (
-                <div className="notif warn-n" style={{ marginBottom: 12, borderLeftColor: '#D13310', background: '#FEF0F0' }}>
-                    <i className="ti ti-alert-triangle" style={{ color: '#D13310' }} />
+                <div className="notif warn-n"
+                     style={{marginBottom: 12, borderLeftColor: '#D13310', background: '#FEF0F0'}}>
+                    <i className="ti ti-alert-triangle" style={{color: '#D13310'}}/>
                     <span>{alert}</span>
                 </div>
             )}
 
-            <div className="notif" style={{ marginBottom: 12 }}>
-                <i className="ti ti-info-circle" />
+            <div className="notif" style={{marginBottom: 12}}>
+                <i className="ti ti-info-circle"/>
                 <span>
-                    Edite o <code style={{ color: '#2B4D6F', fontWeight: 600 }}>msgram.yml</code> abaixo.
+                    Edite o <code style={{color: '#2B4D6F', fontWeight: 600}}>msgram.yml</code> abaixo.
                 </span>
             </div>
 
             <YamlEditor value={yaml} onChange={onChange}/>
 
-            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ flex: 1 }}>
+            <div style={{marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8}}>
+                <div style={{display: 'flex', gap: 8}}>
+                    <div style={{flex: 1}}>
                         <SaveButton onSave={onSave} savedFeedback={savedFeedback}/>
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div style={{flex: 1}}>
                         <CopyButton getValue={() => yaml}/>
                     </div>
                 </div>
-                <div style={{ width: '100%' }}>
+                <div style={{width: '100%'}}>
                     <RunButton onRun={onRun} running={running}/>
                 </div>
             </div>

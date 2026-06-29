@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { now, escHtml, getCharStatus, getStatusColor, colorizeYaml } from '../../utils/helpers';
+import {describe, expect, it} from 'vitest';
+import {colorizeYaml, escHtml, getCharStatus, getStatusColor, now} from '../../utils/helpers';
 
 describe('helpers', () => {
 

@@ -1,9 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { ActionView } from '../../../components/action/ActionView';
+import {fireEvent, render, screen} from '@testing-library/react';
+import {describe, expect, it, vi} from 'vitest';
+import {ActionView} from '../../../components/action/ActionView';
 
 vi.mock('../../../components/action/YamlEditor.tsx', () => ({
-    YamlEditor: ({ value, onChange }: any) => (
+    YamlEditor: ({value, onChange}: any) => (
         <div>
             <span data-testid="yaml-value">{value}</span>
             <button
@@ -17,7 +17,7 @@ vi.mock('../../../components/action/YamlEditor.tsx', () => ({
 }));
 
 vi.mock('../../../components/action/SaveButton.tsx', () => ({
-    SaveButton: ({ onSave }: any) => (
+    SaveButton: ({onSave}: any) => (
         <button data-testid="save-button" onClick={onSave}>
             Salvar
         </button>
@@ -25,7 +25,7 @@ vi.mock('../../../components/action/SaveButton.tsx', () => ({
 }));
 
 vi.mock('../../../components/action/CopyButton.tsx', () => ({
-    CopyButton: ({ getValue }: any) => (
+    CopyButton: ({getValue}: any) => (
         <button data-testid="copy-button">
             {getValue()}
         </button>
@@ -33,7 +33,7 @@ vi.mock('../../../components/action/CopyButton.tsx', () => ({
 }));
 
 vi.mock('../../../components/action/RunButton.tsx', () => ({
-    RunButton: ({ onRun }: any) => (
+    RunButton: ({onRun}: any) => (
         <button data-testid="run-button" onClick={onRun}>
             Executar
         </button>

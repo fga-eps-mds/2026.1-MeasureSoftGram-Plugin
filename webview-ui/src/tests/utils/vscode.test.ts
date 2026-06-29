@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 describe('getVSCodeAPI', () => {
     const mockApi = {
@@ -13,13 +13,13 @@ describe('getVSCodeAPI', () => {
     });
 
     it('deve retornar a api do vscode', async () => {
-        const { getVSCodeAPI } = await import('../../utils/vscode');
+        const {getVSCodeAPI} = await import('../../utils/vscode');
         const api = getVSCodeAPI();
         expect(api).toBe(mockApi);
     });
 
     it('deve chamar acquireVsCodeApi apenas uma vez (singleton)', async () => {
-        const { getVSCodeAPI } = await import('../../utils/vscode');
+        const {getVSCodeAPI} = await import('../../utils/vscode');
         getVSCodeAPI();
         getVSCodeAPI();
         expect(acquireVsCodeApi).toHaveBeenCalledTimes(1);

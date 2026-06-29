@@ -1,13 +1,13 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { colorizeYaml, escHtml } from '../../utils/helpers.ts';
+import React, {useCallback, useEffect, useRef} from 'react';
+import {colorizeYaml, escHtml} from '../../utils/helpers.ts';
 
 interface YamlEditorProps {
     value: string;
     onChange: (value: string) => void;
 }
 
-export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
-    const preRef    = useRef<HTMLPreElement>(null);
+export const YamlEditor: React.FC<YamlEditorProps> = ({value, onChange}) => {
+    const preRef = useRef<HTMLPreElement>(null);
     const editorRef = useRef<HTMLTextAreaElement>(null);
 
     const syncPreview = useCallback((raw: string) => {
@@ -18,7 +18,7 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
 
     const syncScroll = useCallback(() => {
         if (editorRef.current && preRef.current) {
-            preRef.current.scrollTop  = editorRef.current.scrollTop;
+            preRef.current.scrollTop = editorRef.current.scrollTop;
             preRef.current.scrollLeft = editorRef.current.scrollLeft;
         }
     }, []);
@@ -39,9 +39,9 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key !== 'Tab') return;
         e.preventDefault();
-        const el     = e.currentTarget;
-        const start  = el.selectionStart;
-        const end    = el.selectionEnd;
+        const el = e.currentTarget;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
         const indent = '  ';
         const newVal = el.value.slice(0, start) + indent + el.value.slice(end);
         onChange(newVal);
@@ -53,10 +53,10 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
 
     return (
         <div className="fg">
-            <label className="fl" style={{ marginBottom: 5 }}>
+            <label className="fl" style={{marginBottom: 5}}>
                 <i
                     className="ti ti-file-code"
-                    style={{ fontSize: 12, verticalAlign: '-1px', marginRight: 3 }}
+                    style={{fontSize: 12, verticalAlign: '-1px', marginRight: 3}}
                 />
                 msgram.yml
             </label>

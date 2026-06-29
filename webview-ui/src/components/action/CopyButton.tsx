@@ -4,11 +4,12 @@ interface CopyButtonProps {
     getValue: () => string;
 }
 
-export const CopyButton: React.FC<CopyButtonProps> = ({ getValue }) => {
+export const CopyButton: React.FC<CopyButtonProps> = ({getValue}) => {
     const btnRef = useRef<HTMLButtonElement>(null);
 
     const handleCopy = () => {
-        navigator.clipboard?.writeText(getValue()).catch(() => {});
+        navigator.clipboard?.writeText(getValue()).catch(() => {
+        });
         if (!btnRef.current) return;
         btnRef.current.innerHTML = '<i class="ti ti-check"></i> Copiado';
         setTimeout(() => {
@@ -19,8 +20,8 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ getValue }) => {
     };
 
     return (
-        <button ref={btnRef} className="btn" onClick={handleCopy} style={{ width: '100%', justifyContent: 'center' }}>
-            <i className="ti ti-copy" /> Copiar
+        <button ref={btnRef} className="btn" onClick={handleCopy} style={{width: '100%', justifyContent: 'center'}}>
+            <i className="ti ti-copy"/> Copiar
         </button>
     );
 };

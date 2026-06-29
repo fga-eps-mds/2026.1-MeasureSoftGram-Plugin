@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { applySettingsToYaml } from '../../utils/workflowYaml';
-import { DEFAULT_WORKFLOW_YAML } from '../../utils/defaultWorkflow';
+import {describe, expect, it} from 'vitest';
+import {applySettingsToYaml} from '../../utils/workflowYaml';
+import {DEFAULT_WORKFLOW_YAML} from '../../utils/defaultWorkflow';
 
 describe('applySettingsToYaml', () => {
     it('deve substituir githubToken pelo secret quando preenchido', () => {
@@ -46,7 +46,7 @@ describe('applySettingsToYaml', () => {
 
     it('deve preservar comentários da linha ao substituir', () => {
         const yaml = `        githubToken: # Token do GitHub`;
-        const result = applySettingsToYaml(yaml, { githubToken: 'token' });
+        const result = applySettingsToYaml(yaml, {githubToken: 'token'});
         expect(result).toContain('# Token do GitHub');
         expect(result).toContain('${{ secrets.GITHUB_TOKEN }}');
     });

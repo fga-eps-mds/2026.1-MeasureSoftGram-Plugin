@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getMissingSettings } from '../../utils/validation';
+import {describe, expect, it} from 'vitest';
+import {getMissingSettings} from '../../utils/validation';
 
 describe('getMissingSettings', () => {
     it('deve retornar lista vazia quando todos os campos obrigatórios estão preenchidos', () => {

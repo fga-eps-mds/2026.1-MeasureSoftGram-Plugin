@@ -1,10 +1,10 @@
-import type { SettingsData } from '../types';
+import type {SettingsData} from '../types';
 
 const REQUIRED_FIELDS: { key: keyof SettingsData; label: string }[] = [
-    { key: 'githubToken',         label: 'GitHub Token' },
-    { key: 'msgramServiceToken',  label: 'MSGRAM Service Token' },
-    { key: 'productName',         label: 'Product Name' },
-    { key: 'workflowName',        label: 'Workflow Name' },
+    {key: 'githubToken', label: 'GitHub Token'},
+    {key: 'msgramServiceToken', label: 'MSGRAM Service Token'},
+    {key: 'productName', label: 'Product Name'},
+    {key: 'workflowName', label: 'Workflow Name'},
 ];
 
 export function getMissingSettings(
