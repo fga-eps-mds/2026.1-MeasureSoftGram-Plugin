@@ -84,4 +84,36 @@ describe('SettingsView', () => {
         });
     });
 
+    describe('edição de campos', () => {
+        it.each([
+            ['inp-serviceurl', 'https://nova-url.com/'],
+            ['inp-msgram-token', 'novo-token'],
+            ['inp-github-token', 'ghp_novo'],
+            ['inp-sonar-key', 'sonar-key'],
+            ['inp-product', 'Novo Produto'],
+            ['inp-workflowname', 'Deploy'],
+        ])('deve atualizar o campo "%s" ao digitar', (id, value) => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            const input = document.getElementById(id) as HTMLInputElement;
+            fireEvent.change(input, {target: {value}});
+            expect(input.value).toBe(value);
+        });
+
+        it('deve chamar setState ao alterar qualquer campo', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.change(document.getElementById('inp-serviceurl')!, {
+                target: {value: 'https://changed.com/'},
+            });
+            expect(mockSetState).toHaveBeenCalled();
+        });
+
+        it('deve persistir o draft com os valores atuais ao alterar um campo', () => {
+            render(<SettingsView onSave={onSave} savedFeedback={false}/>);
+            fireEvent.change(document.getElementById('inp-product')!, {
+                target: {value: 'Produto Teste'},
+            });
+            const call = mockSetState.mock.calls[0][0] as Record<string, unknown>;
+            expect((call.settingsDraft as SettingsData).productName).toBe('Produto Teste');
+        });
+    });
 });
