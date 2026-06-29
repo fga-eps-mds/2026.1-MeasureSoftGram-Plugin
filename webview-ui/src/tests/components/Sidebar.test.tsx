@@ -120,5 +120,29 @@ describe('Sidebar', () => {
         });
     });
 
+    describe('status', () => {
+        it('deve exibir "Conectado" quando há scoreData', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            expect(screen.getByText('Conectado')).toBeInTheDocument();
+        });
+
+        it('deve exibir "Sem dados" quando scoreData é null', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={null}/>);
+            expect(screen.getByText('Sem dados')).toBeInTheDocument();
+        });
+
+        it('deve usar cor verde no dot quando há scoreData', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            const dot = document.querySelector('.sdot') as HTMLElement;
+            expect(dot.style.background).toBe('rgb(4, 114, 77)');
+        });
+
+        it('deve usar cor cinza no dot quando não há scoreData', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={null}/>);
+            const dot = document.querySelector('.sdot') as HTMLElement;
+            expect(dot).toHaveStyle({background: '#888'});
+        });
+    });
+
 
 });
