@@ -89,4 +89,21 @@ describe('DashboardView', () => {
             expect(screen.queryByText(/Atenção antes do commit/i)).not.toBeInTheDocument();
         });
     });
+
+    describe('notificação', () => {
+        it('deve exibir notificação de sucesso quando notifText está presente', () => {
+            render(<DashboardView {...defaultProps} notifText="Análise concluída!" notifType="ok" />);
+            expect(screen.getByText('Análise concluída!')).toBeInTheDocument();
+        });
+
+        it('deve exibir notificação de erro quando notifType é error', () => {
+            render(<DashboardView {...defaultProps} notifText="Falha na análise" notifType="error" />);
+            expect(screen.getByText('Falha na análise')).toBeInTheDocument();
+        });
+
+        it('não deve exibir notificação quando notifText é vazio', () => {
+            render(<DashboardView {...defaultProps} notifText="" />);
+            expect(screen.queryByRole('status')).not.toBeInTheDocument();
+        });
+    });
 });
