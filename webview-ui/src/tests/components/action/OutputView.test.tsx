@@ -52,6 +52,23 @@ describe('OutputView', () => {
         expect(spans[2]).toHaveTextContent('terceira');
     });
 
+    it('deve aplicar a classe "lerr" em linhas de erro', () => {
+        const lines = makeLines([{text: 'erro grave', isError: true}]);
+        render(<OutputView lines={lines}/>);
+        const span = screen.getByText('erro grave');
+        expect(span).toHaveClass('lerr');
+        expect(span).not.toHaveClass('lok');
+    });
+
+    it('deve aplicar a classe "lok" em linhas normais', () => {
+        const lines = makeLines([{text: 'sucesso', isError: false}]);
+        render(<OutputView lines={lines}/>);
+        const span = screen.getByText('sucesso');
+        expect(span).toHaveClass('lok');
+        expect(span).not.toHaveClass('lerr');
+    });
+
+
     it('deve lidar com texto vazio em uma linha sem quebrar', () => {
         const lines = makeLines([{text: ''}]);
         expect(() => render(<OutputView lines={lines}/>)).not.toThrow();
