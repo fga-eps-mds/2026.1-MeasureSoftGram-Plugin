@@ -91,4 +91,34 @@ describe('Sidebar', () => {
             expect(screen.getByRole('combobox')).toHaveValue('');
         });
     });
+
+    describe('score', () => {
+        it('deve exibir ícone de loading no score-box quando scoreLoading', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreLoading={true}/>);
+            const scoreBox = document.getElementById('sb-score')!;
+            expect(scoreBox.querySelector('.ti-loader')).toBeInTheDocument();
+        });
+
+        it('deve exibir o score formatado quando há dados', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={SCORE_DATA}/>);
+            expect(document.getElementById('sb-score')).toHaveTextContent('0.87');
+        });
+
+        it('deve exibir "—" quando não há dados e não está carregando', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={null} scoreLoading={false}/>);
+            expect(document.getElementById('sb-score')).toHaveTextContent('—');
+        });
+
+        it('deve exibir aviso de métricas não calculadas quando noData', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={{...SCORE_DATA, noData: true}}/>);
+            expect(screen.getByText(/Métricas ainda não calculadas/)).toBeInTheDocument();
+        });
+
+        it('não deve exibir aviso de noData quando scoreLoading', () => {
+            render(<Sidebar {...DEFAULT_PROPS} scoreData={{...SCORE_DATA, noData: true}} scoreLoading={true}/>);
+            expect(screen.queryByText(/Métricas ainda não calculadas/)).not.toBeInTheDocument();
+        });
+    });
+
+
 });
