@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 const {mockPostMessage, mockGetState, mockSetState, mockGetMissingSettings} = vi.hoisted(() => {
@@ -106,7 +106,6 @@ vi.mock('../utils/validation', () => ({
 
 const {default: App} = await import('../App');
 
-
 describe('App', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -129,6 +128,39 @@ describe('App', () => {
             render(<App/>);
             expect(screen.getByTestId('sidebar')).toBeInTheDocument();
             expect(screen.getByTestId('tabs')).toBeInTheDocument();
+        });
+    });
+
+    describe('navegação de abas', () => {
+        it('deve exibir SettingsView ao selecionar a aba settings', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-settings'));
+            expect(screen.getByTestId('settings-view')).toBeInTheDocument();
+        });
+
+        it('deve exibir OutputView ao selecionar a aba output', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-output'));
+            expect(screen.getByTestId('output-view')).toBeInTheDocument();
+        });
+
+        it('deve exibir ActionView ao selecionar a aba action', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            expect(screen.getByTestId('action-view')).toBeInTheDocument();
+        });
+
+        it('deve enviar request_yaml ao navegar para a aba action', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-action'));
+            expect(mockPostMessage).toHaveBeenCalledWith({command: 'request_yaml'});
+        });
+
+        it('deve voltar para DashboardView ao selecionar a aba dashboard', () => {
+            render(<App/>);
+            fireEvent.click(screen.getByTestId('tab-settings'));
+            fireEvent.click(screen.getByTestId('tab-dashboard'));
+            expect(screen.getByTestId('dashboard-view')).toBeInTheDocument();
         });
     });
 });
