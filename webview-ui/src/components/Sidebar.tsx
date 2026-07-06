@@ -149,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         )}
                     </div>
                     <div className="score-lbl" style={{fontFamily: 'Roboto, sans-serif', fontSize: 10, color: '#888'}}>
-                        score geral
+                        TSQMI
                     </div>
                 </div>
 

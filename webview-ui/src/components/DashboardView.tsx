@@ -107,7 +107,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {scoreData ? score.toFixed(2) : '—'}
                     </div>
                     <div className="hero-right">
-                        <div className="hero-lbl">Nota geral do produto</div>
+                        <div className="hero-lbl">TSQMI do produto</div>
                         <div className="hero-bar">
                             <div
                                 className="hero-fill"
