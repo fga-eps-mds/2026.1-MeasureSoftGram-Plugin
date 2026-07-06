@@ -8,7 +8,7 @@
 &nbsp;
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/vscode)
 &nbsp;
-[![Site Oficial](https://img.shields.io/badge/Site-msgram.lappis.rocks-green.svg)](https://msgram.lappis.rocks/)
+[![Site Oficial](https://img.shields.io/badge/Site-MeasureSoftGram-green.svg)](https://github.com/fga-eps-mds/MeasureSoftGram-Service)
 
 [Instalar Extensão](#instalação) · [Site Oficial](https://msgram.lappis.rocks/) · [Reportar Bug](https://github.com/fga-eps-mds/MeasureSoftGram-Plugin/issues) · [Documentação](https://github.com/fga-eps-mds/MeasureSoftGram-Plugin)
 
@@ -18,14 +18,14 @@
 
 ## Visão geral
 
-O painel exibe o score geral **TSQMI**, as três características de qualidade com valores e metas definidas pela equipe, e emite alertas de regressão antes de cada commit.
+O painel exibe o indicador multidimensional da qualidade de software **TSQMI**, as três características de qualidade com valores e metas definidas pela equipe, e emite alertas de regressão antes de cada commit.
 
 ![Painel principal do plugin mostrando score 0.86 e características Reliability, Maintainability e Functional Suitability](https://raw.githubusercontent.com/fga-eps-mds/2026.1-MeasureSoftGram-Plugin/refs/heads/develop/assets/painel-principal.png)
 ---
 
 ## O que o plugin faz
 
-- **Score unificado (TSQMI)** - um único número de 0 a 1 que resume a saúde do projeto, calculado por um metamodelo algébrico original (produto de Hadamard + norma de Frobenius).
+- **Indicador Multidimensional da Qualidade Geral/Total do Software (TSQMI)** - um único número de 0 a 1 que resume a saúde do projeto, calculado por um metamodelo algébrico original (produto de Hadamard + norma de Frobenius).
 - **Três dimensões de qualidade** - Confiabilidade, Manutenibilidade e Adequação Funcional, cada uma com valor atual e meta configurável.
 - **Dashboards Grafana embutidos** - quatro painéis analíticos carregados diretamente dentro do VS Code, sem abrir o browser.
 - **Visibilidade de log** - todas as chamadas à API ficam visíveis no painel Output do VS Code para fácil diagnóstico.
@@ -36,7 +36,7 @@ O painel exibe o score geral **TSQMI**, as três características de qualidade c
 
 ## Instalação
 
-1. Instale a extensão no VS Code e crie sua conta em [msgram.lappis.rocks](https://msgram.lappis.rocks/)
+1. Instale a extensão no VS Code e crie sua conta em no [MeasureSoftGram](https://github.com/fga-eps-mds/MeasureSoftGram-Service)
 2. Clique no ícone **MeasureSoftGram** na Activity Bar lateral
 3. Ou acesse via paleta de comandos: `Ctrl+Shift+P` → `MeasureSoftGram: Abrir Painel`
 4. Faça login com sua conta - pronto.
@@ -101,7 +101,7 @@ Executa a action que publica a qualidade de software direto no MeasureSoftGram, 
 
 ## Sobre o modelo de qualidade
 
-O MeasureSoftGram usa um **metamodelo algébrico original**, combinação do produto de Hadamard com norma de Frobenius, para agregar métricas brutas em indicadores multidimensionais de qualidade. O resultado é um score contínuo, comparável entre projetos e rastreável ao longo do tempo.
+Trata-se de um modelo hierárquico, multinível, multivariado e multidimensional. O MeasureSoftGram usa um metamodelo algébrico (original), que representa a qualidade de produto de software no espaço R_N. Utiliza a combinação do [produto de Hadamard](https://en.wikipedia.org/wiki/Hadamard_product_(matrices)) com [norma de Frobenius](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm), para agregar métricas e medidas em indicadores multidimensionais de qualidade. O resultado é um indicador multidimensional, contínuo, rastreável ao longo do tempo e que expressa a percepção quantitativa da qualidade de software.
 
 ---
 
