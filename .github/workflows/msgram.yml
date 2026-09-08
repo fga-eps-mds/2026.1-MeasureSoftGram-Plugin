@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: msg
-        uses: fga-eps-mds/2026.1-MeasureSoftGram-Action@main
+        uses: fga-eps-mds/MeasureSoftGram-Action@develop
         with:
           githubToken: ${{ secrets.GITHUBTOKEN }}
           msgramServiceToken: ${{ secrets.MSGRAMPLUGINTOKEN }}
